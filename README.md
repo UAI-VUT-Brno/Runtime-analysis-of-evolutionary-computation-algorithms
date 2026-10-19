@@ -10,17 +10,17 @@ The repository is pinned to **Lean 4.32.1 / Mathlib v4.32.1**.
 
 The promoted finite Witt interval is therefore
 
-\[
-0 \le c \le \log 3, \qquad n\ge4,
-\]
+$$
+0 \le c \le \log 3, \qquad n \ge 4,
+$$
 
 with final expectation and high-probability runtime interfaces on `0 < c <= log 3`. The fixed-scale exact singleton-rate asymptotic remains
 
-\[
-(n q_n(c))^{-1}\longrightarrow \frac{e^c}{c},
+$$
+(n\,q_n(c))^{-1} \longrightarrow \frac{e^c}{c},
 \qquad
-q_n(c)=\frac cn\left(1-\frac cn\right)^{n-1},
-\]
+q_n(c) = \frac{c}{n}\left(1-\frac{c}{n}\right)^{n-1},
+$$
 
 with `e^c/c` minimized at `c=1`.
 
@@ -41,7 +41,7 @@ Warnings count as failures.
 
 ### Stochastic-process semantics
 
-The repository contains finite and infinite trajectory semantics for stochastic transition systems, including finite path weights, projective consistency, Markov-kernel/Ionescu--Tulcea trajectories, finite-marginal identification, first-hitting-time semantics, and unrestricted-runtime bridges.
+The repository contains finite and infinite trajectory semantics for stochastic transition systems, including finite path weights, projective consistency, Markov-kernel/Ionescu–Tulcea trajectories, finite-marginal identification, first-hitting-time semantics, and unrestricted-runtime bridges.
 
 ### Generic runtime tools
 
