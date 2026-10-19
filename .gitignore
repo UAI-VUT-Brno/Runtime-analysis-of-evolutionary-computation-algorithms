@@ -26,12 +26,10 @@ stage*_overlay.zip
 __pycache__/
 *.py[cod]
 
-# Agent working rules and harness configuration -- deliberately not versioned.
-# The guard scripts themselves live in scripts/hooks/ and are versioned like any other
-# script; only the wiring that invokes them, and the prose rules, stay on the machine.
-CLAUDE.md
-SOUL.md
-.claude/
+# Per-machine permission grants: local state, specific to one developer's machine.
+# The rest of .claude/ is versioned, as are CLAUDE.md and SOUL.md, so that the working
+# rules and the guard wiring travel with the repository.
+.claude/settings.local.json
 
 # Editor / OS artifacts
 .vscode/
