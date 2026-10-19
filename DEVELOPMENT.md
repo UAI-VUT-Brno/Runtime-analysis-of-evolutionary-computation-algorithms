@@ -6,13 +6,13 @@ This file records invariant development rules for ECRuntime. Historical compiler
 
 - The project is pinned to **Lean 4.32.1** and **Mathlib v4.32.1**.
 - A build in the pinned project environment is the authority for promotion. That build may
-  now be run locally by whoever prepared the change: `scripts/verify.sh` executes the full
+  now be run locally by whoever prepared the change: `scripts/verify.ps1` executes the full
   gate, so work is presented already verified rather than handed over for verification.
 - **Promotion remains a human decision.** A green gate makes a stage *promotable*; it does
   not promote it. Separating who produces from who promotes is the point of this section,
   and it survives the change above.
 - New or refactored source is a **candidate** until a clean gate run says otherwise. A run
-  with `--candidate` (which permits `sorry`) is never promotable, however green.
+  with `-Candidate` (which permits `sorry`) is never promotable, however green.
 - Local/static inspection may guide development but never substitutes for the pinned build.
 
 The latest promoted checkpoint is **Stage 79 fix 1**. It compiler-promotes the corrected suffix-ratio geometry, pointwise nonnegative accepted left contribution, exact singleton left gain, and event-weighted lower bound `(p₁/n) g_i`. There is currently **no active theorem candidate**; the repository is paused at this clean boundary for theorem-inventory and literature-frontier consolidation.
@@ -22,7 +22,7 @@ The latest promoted checkpoint is **Stage 79 fix 1**. It compiler-promotes the c
 A stage is promoted only when all required checks succeed:
 
 1. root aggregator present;
-2. source hygiene (`scripts/hygiene.py`);
+2. source hygiene (`scripts/audit.lean`);
 3. dependency/cache setup;
 4. each designated focused target;
 5. complete root `lake build`;
@@ -32,7 +32,8 @@ A stage is promoted only when all required checks succeed:
 
 Warnings count as failures. A focused build alone is insufficient.
 
-`scripts/verify.sh --stage <N> --focus <module>` runs all eight and prints the gate table.
+`pwsh -File scripts/verify.ps1 -Stage <N> -Focus <module>` runs all eight and prints the gate
+table.
 
 Gate 6 is what a plain `lake build` cannot give you. `ECRuntimeTest` pins, for every facade
 theorem, both its axiom dependencies and its elaborated statement. It therefore rejects a
@@ -91,22 +92,24 @@ The root `ECRuntime.lean` should import the maintained integration graph. Before
 - `DEVELOPMENT.md`: invariant workflow rules;
 - `docs/PROJECT_STATE.tex`: current verified theorem inventory, promoted boundary, and next mathematical step;
 - `docs/LITERATURE_ROADMAP.md`: literature mapping and prioritized future theorem families;
+- `docs/FORMALIZED_RESULTS_AND_LITERATURE_FRONTIER.md`: provenance, status vocabulary, and the
+  next-paper frontier;
 - `HISTORY.md`: compact milestone history.
 
 Do not duplicate per-fix chronology across all documents.
 
 ## 8. Verification runners
 
-There is **one** runner, `scripts/verify.sh`, and it is stage-agnostic. The stage is an
+There is **one** runner, `scripts/verify.ps1`, and it is stage-agnostic. The stage is an
 argument. Promoting a stage no longer means copying the runner to a new filename and
 updating it, the exporter's `VERSION`, and `README.md` in lockstep.
 
 It performs:
 
-1. root/source-hygiene preflight (`scripts/hygiene.py`);
+1. root/source-hygiene preflight (`scripts/audit.lean`);
 2. environment capture;
 3. `lake exe cache get`;
-4. the designated focused target (`--focus`);
+4. the designated focused target (`-Focus`);
 5. complete `lake build`;
 6. the `ECRuntimeTest` regression suite;
 7. warning/error scan;
@@ -121,7 +124,8 @@ is written outside the repository root.
 The hygiene preflight measures reachability from the **public facades**, not from
 `ECRuntime.lean`. The root aggregator imports almost every module directly, so a
 root-reachability check passes by construction and can never detect a module nothing
-consumes. Facades are listed in `scripts/hygiene.py`; add one when a stage promotes one.
+consumes. Facades are listed in `scripts/audit.lean` as `facades`; add one when a stage
+promotes one.
 
 ## 9. Export discipline
 
@@ -131,10 +135,10 @@ Exports are source-only and reproducible. The exporter must produce a repository
 
 For each substantive modification return:
 
-- the gate table from `scripts/verify.sh`, verbatim, including any gate that failed;
+- the gate table from `scripts/verify.ps1`, verbatim, including any gate that failed;
 - what the stage promotes, and what it deliberately defers;
 - the `HISTORY.md` entry;
-- the source export when an archival snapshot is wanted (`scripts/export_repository.py`).
+- the source export when an archival snapshot is wanted (`scripts/export_repository.ps1`).
 
 The export remains a reproducibility and hygiene check — a whitelist plus a deterministic
 manifest, so an unexpected file in the tree is a failure. It is no longer the mechanism by

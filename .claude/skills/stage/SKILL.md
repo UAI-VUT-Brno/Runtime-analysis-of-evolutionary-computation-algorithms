@@ -70,7 +70,7 @@ printf '%s\n' 'import ECRuntime.<Module>' '#check @ECRuntime.<thm>' | lake env l
 
 Wrap each in `/-- info: … -/` + `#guard_msgs in`. A pin edited by hand to make the build pass defeats the entire mechanism. Add a non-vacuity witness to `ECRuntimeTest/NonVacuity.lean`.
 
-Register the new module as a facade in `scripts/hygiene.py` if it is one.
+Register the new module as a facade in `scripts/audit.lean` (`facades`) if it is one.
 
 ### 7. Document — `lean-scribe`
 
@@ -81,7 +81,7 @@ Delegate. Six documents, six registers. Update `docs/frontier.toml` to mark the 
 Delete `.candidate-stage`, then:
 
 ```bash
-bash scripts/verify.sh --stage <N> --focus ECRuntime.<Module>
+pwsh -File scripts/verify.ps1 -Stage <N> -Focus ECRuntime.<Module>
 ```
 
 Every gate must pass; warnings count as failures. If a gate fails, this is a **fix round**, not a new stage: find the first genuine diagnostic, make the smallest repair, change nothing unrelated, and record it as `Stage N fix M`. A fix must not change any theorem statement — the pins enforce this.

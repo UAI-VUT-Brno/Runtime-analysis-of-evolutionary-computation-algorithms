@@ -2,7 +2,7 @@
 
 Compact mathematical milestones only. Detailed compiler-fix chronology is retained in the
 per-stage verification reviews written to `.verify/stage-<N>/review.txt` by
-`scripts/verify.sh`, and in archived verification bundles.
+`scripts/verify.ps1`, and in archived verification bundles.
 
 ## Foundations
 

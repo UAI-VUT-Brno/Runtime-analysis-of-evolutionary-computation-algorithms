@@ -2,7 +2,7 @@
 #
 # "What to do next" previously lived as prose in six documents at three time
 # horizons. This file holds the structured form; the prose keeps its own voice
-# and `scripts/hygiene.py` can cross-check the two.
+# and `scripts/state_report.py` cross-checks the two.
 #
 # status values:
 #   promoted  -- compiler-promoted, full gate green

@@ -26,7 +26,7 @@ Two layers enforce this, and you must not work around either:
 | Layer | What it does |
 |---|---|
 | `permissions.deny` in `.claude/settings.json` | hard-blocks `Artifact`, web fetch/search, the Claude Docs tools, and the network CLIs |
-| `scripts/hooks/guard_outbound.py` | scans whole `Bash`/`PowerShell` command strings, so a blocked verb hidden in a pipe, behind `&&`, or inside `bash -c` is still caught |
+| `scripts/hooks/guard_outbound.ps1` | scans whole `Bash`/`PowerShell` command strings, so a blocked verb hidden in a pipe, behind `&&`, or inside `bash -c` is still caught |
 
 If a command is blocked, that is the answer. Do not rename, re-encode, split across
 calls, or switch tools to get the same reach. Report the block.
@@ -75,12 +75,20 @@ that is intentional.
 ## Verification
 
 ```bash
-bash scripts/verify.sh --stage <N> --focus ECRuntime.<NewModule>   # full gate
-bash scripts/verify.sh --stage <N> --focus ECRuntime.<M> --quick   # skip cache+export
-bash scripts/verify.sh --stage <N> --focus ECRuntime.<M> --candidate  # allow sorry
-python3 scripts/hygiene.py                                          # linter alone
-python3 scripts/validate_module.py ECRuntime/<Module>.lean          # one file, incl. axioms
-lake env lean ECRuntime/<Module>.lean                               # ~12s inner loop
+pwsh -File scripts/verify.ps1 -Stage <N> -Focus ECRuntime.<NewModule>    # full gate
+pwsh -File scripts/verify.ps1 -Stage <N> -Focus ECRuntime.<M> -Quick     # skip cache+export
+pwsh -File scripts/verify.ps1 -Stage <N> -Focus ECRuntime.<M> -Candidate # allow sorry
+lake env lean --run scripts/audit.lean strict                            # audit alone, ~35s
+lake env lean ECRuntime/<Module>.lean                                    # ~12s inner loop, one file
+```
+
+There is no single-module validator. `lake env lean <file>` gives elaboration errors and
+warnings for one file; `scripts/audit.lean` reads the compiled environment and reports axiom
+integrity, doc coverage, unused binders and facade reachability for the whole repository in
+one pass, so filter its output for the module you care about. For one theorem's axioms:
+
+```bash
+printf '%s\n' 'import ECRuntime.<Module>' '#print axioms ECRuntime.<thm>' | lake env lean --stdin
 ```
 
 ## Proof-dependency network
@@ -88,7 +96,7 @@ lake env lean ECRuntime/<Module>.lean                               # ~12s inner
 ```bash
 lake env lean scripts/dep_extract.lean              # refresh the data (~1 min)
 python3 scripts/dep_graph.py --level family         # architecture at a glance
-python3 scripts/dep_graph.py --level module         # 157 modules, transitively reduced
+python3 scripts/dep_graph.py --level module         # every module, transitively reduced
 python3 scripts/dep_graph.py --theorem <name> --depth 2
 python3 scripts/dep_graph.py --redundant-imports    # imports safe to drop
 ```
@@ -144,7 +152,24 @@ literature conditional-probability step until the conditioning measure has been
 formalized correctly — this rule is why the Lemma-9 correction branch exists.
 
 Do not add a hypothesis the proof does not use: it narrows the theorem for every caller
-and gains nothing. `scripts/hygiene.py` reports these.
+and gains nothing. `scripts/audit.lean` reports these.
+
+## Agents and skills
+
+Versioned under `.claude/`, so they travel with the repository instead of living in one
+developer's profile.
+
+| Name | Role |
+|---|---|
+| `/stage` | runs one stage end to end, with two human gates |
+| `/lean-validate` | checks one module, then interprets the findings |
+| `lean-architect` | statements only, never proofs |
+| `lean-prover` | discharges `sorry` against frozen statements |
+| `lean-auditor` | adversarial, read-only |
+| `lean-scribe` | the documentation set, six registers |
+
+Adding theorems is `/stage`. There is deliberately no lighter path that adds them while
+skipping the statement and promotion gates.
 
 ## Documentation
 
@@ -168,7 +193,7 @@ ASCII spelling in some modules is legacy, not the convention.
 - `HasUniformExactLevelExitBounds` appears at 76 sites, always as a hypothesis, and is
   never discharged. The layer cannot be applied to any concrete algorithm until it is.
 - 16 modules are unreachable from every facade; they are grandfathered in
-  `scripts/hygiene.py` as `ORPHAN_ALLOWLIST` pending a decision to discharge or delete.
+  `scripts/audit.lean` as `orphanAllowlist` pending a decision to discharge or delete.
   That list may shrink, never grow.
 - Linear-function results assume `NonincreasingLinearWeights`. The WLOG reduction from
   arbitrary positive weights to sorted ones is **not** formalized. Do not state results

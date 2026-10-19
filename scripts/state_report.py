@@ -195,8 +195,8 @@ def documented_checkpoint() -> dict:
 
 
 def gates(stage: str, focus: str) -> dict:
-    rc, out = run(["bash", str(REPO / "scripts" / "verify.sh"),
-                   "--stage", stage, "--focus", focus, "--quick"], timeout=1800)
+    rc, out = run(["pwsh", "-NoProfile", "-File", str(REPO / "scripts" / "verify.ps1"),
+                   "-Stage", stage, "-Focus", focus, "-Quick"], timeout=1800)
     results = dict(
         re.findall(r"^([a-z_]+)=(\d+)$", out, re.M)
     )
@@ -212,7 +212,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("-o", "--output", help="write JSON here (default: stdout)")
     ap.add_argument("--run-gates", action="store_true",
-                    help="also run scripts/verify.sh (slow)")
+                    help="also run scripts/verify.ps1 (slow)")
     ap.add_argument("--stage", default="79")
     ap.add_argument("--focus", default="ECRuntime.StaticUnaryUnbiasedCorrectedLeftGain")
     args = ap.parse_args()
