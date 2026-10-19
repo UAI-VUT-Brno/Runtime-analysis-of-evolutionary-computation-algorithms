@@ -207,6 +207,9 @@ Stages 68--72 establish the reusable operator/probability layer:
 - `radiusMass law k` is the radius distribution;
 - `oneBitMass law = p_1`;
 - `meanRadius law = chi`;
+- `singleZeroFlipWeight law x` aggregates the mass of elementary one-bit improvements;
+- the independent-bit `(1+1)` EA embeds as `independentBitLaw`, so this abstraction
+  extends the existing mutation semantics rather than forking them;
 - a specified singleton mask has exact mass `p_1/n`;
 - a specified coordinate flips with exact probability `chi/n`;
 - the second factorial moment is `E[K(K-1)]`;
@@ -389,6 +392,11 @@ The repository should not currently be cited as proving any of the following:
 5. the optimal static/adaptive LeadingOnes mutation-rate statements of Böttcher--Doerr--Neumann (2010);
 6. a unary-unbiased black-box complexity theorem;
 7. the monotone-function dichotomy or plateau-runtime results listed later in this document.
+8. any linear-function statement for **arbitrary** positive weights. The formalized
+   results assume `PositiveLinearWeights` together with `NonincreasingLinearWeights`.
+   The WLOG reduction of an arbitrary positive linear function to a sorted one is
+   routine on paper but is **not** formalized here, so the certified statements cover
+   sorted weight vectors rather than all linear functions.
 
 The immediate mathematical gap in the current chain is much smaller than item 1 as a whole: relate the actual event-weighted right loss to the promoted conditional proxy, combine it with Stage 79's left-gain lower bound, and obtain a corrected per-pivot drift inequality. Only after that should the global multiplicative-drift/runtime theorem be attempted.
 

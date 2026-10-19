@@ -36,6 +36,16 @@ The repository formalizes a Witt-style potential for positive nonincreasing line
 
 **Stage 67 is compiler promoted.** It factors the C3-based expectation/tail consequences into `WittMutationCertifiedRuntime.lean`, exposes the final `0 < c <= log 3` runtime/tail adapter, and removes superseded numerical endpoint modules. The finite-boundary Witt branch is now frozen.
 
+The maintained modules on this line are `WittMutationPotential.lean`,
+`WittMutationDrift.lean`, `WittMutationCaseC3.lean`, `WittMutationC3Envelope.lean`,
+`WittMutationStrictTail.lean`, `WittMutationCertifiedRuntime.lean`,
+`WittMutationC3LogThreeRegime.lean`, `WittMutationLogThreeRuntime.lean`,
+`WittMutationRateAsymptotics.lean`, and `WittMutationSharpRuntimeAsymptotics.lean`.
+
+`WittMutationC3ExtendedRegime.lean` and `WittMutationExtendedRuntime.lean` remain only as
+the older `21/20` compatibility/public API layer used by existing asymptotic presentation
+modules.
+
 ## Active priority A: static unary-unbiased mutation on linear functions
 
 Principal target:

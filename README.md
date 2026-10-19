@@ -1,115 +1,93 @@
 # ECRuntime
 
-Lean 4 formalization of runtime analysis for evolutionary computation (EC), with an emphasis on reusable stochastic-process infrastructure and machine-checked proofs of classical runtime theorems.
+**Runtime analysis of evolutionary algorithms, machine-checked in Lean 4.**
 
-## Verification status
+How many evaluations does a `(1+1)` evolutionary algorithm need to optimize OneMax,
+LeadingOnes, or a linear function? The evolutionary-computation literature answers this
+with delicate probabilistic arguments. ECRuntime rebuilds those arguments from first
+principles and has a proof assistant check every step.
 
-The repository is pinned to **Lean 4.32.1 / Mathlib v4.32.1**.
+**158 modules · 41,980 lines · 1,398 theorems · Lean 4.32.1 / Mathlib v4.32.1**
 
-**Latest compiler-promoted checkpoint: Stage 79 fix 1 (2026-09-25).** The corrected-left-gain module and the complete root build both succeeded warning/error-free, together with repository export and source-hygiene checks. Stage 79 fix 1 therefore promotes the corrected suffix-ratio geometry, pointwise nonnegativity of the accepted left contribution, the exact singleton left gain, and the event-weighted lower bound `(p₁/n) g_i`.
+No `sorry`, no added axioms, no `native_decide`, no `set_option` — enforced by an axiom
+audit that fails the build if any of them ever slips in.
 
-The promoted finite Witt interval is therefore
-
-$$
-0 \le c \le \log 3, \qquad n \ge 4,
-$$
-
-with final expectation and high-probability runtime interfaces on `0 < c <= log 3`. The fixed-scale exact singleton-rate asymptotic remains
-
-$$
-(n\,q_n(c))^{-1} \longrightarrow \frac{e^c}{c},
-\qquad
-q_n(c) = \frac{c}{n}\left(1-\frac{c}{n}\right)^{n-1},
-$$
-
-with `e^c/c` minimized at `c=1`.
-
-There is currently **no active theorem candidate**. The repository is intentionally paused at the promoted Stage-79-fix-1 boundary while the certified theorem inventory and literature frontier are consolidated. The exact current catalogue and the literature-derived next-paper list are in `docs/FORMALIZED_RESULTS_AND_LITERATURE_FRONTIER.md`.
-
-To reproduce the promoted checkpoint, run:
+## Quick start
 
 ```bash
-bash scripts/verify.sh --stage 79 --focus ECRuntime.StaticUnaryUnbiasedCorrectedLeftGain
+lake exe cache get   # pinned Mathlib build cache
+lake build           # builds the library and runs the regression suite
 ```
 
-The runner is stage-agnostic: the stage is an argument, not part of the filename. Gates are
-root aggregator, source hygiene, dependency cache, the focused target, the complete root
-build, a zero-diagnostics scan, the `ECRuntimeTest` regression suite, and the source export.
+## Highlights
+
+**Exact expected runtime for LeadingOnes.** For uniform initialization and any mutation
+probability `0 < p < 1`:
+
+$$
+\mathbb{E}[T] = \frac{1}{2}\sum_{i=0}^{n-1}\frac{1}{p(1-p)^i}
+$$
+
+algebraically equivalent to the Böttcher–Doerr–Neumann (2010) closed form. The public
+facade is `ECRuntime.LeadingOnesMainResults`.
+
+**Witt's sharp upper bound for linear functions.** At the standard rate `p = 1/n`, for
+positive nonincreasing weights, the explicit finite envelope `e·n·log n + 2·e·n`. For the
+scaled rate `p = c/n`, a dimension-uniform certificate on
+
+$$
+0 \le c \le \log 3, \qquad n \ge 4
+$$
+
+carrying the sharp leading factor `e^c/c`, which is minimized at `c = 1`.
+
+**A gap found in a 2024 paper.** While formalizing Doerr–Janett–Lengler (2024), the
+project found a conditioning issue in an intermediate displayed step. Rather than certify
+the published proof verbatim, the repository builds a corrected factorial-moment route.
+Discovering that a published argument does not survive formalization is a result in its
+own right.
+
+**Reusable infrastructure.** Markov-kernel / Ionescu–Tulcea trajectory semantics, additive
+and multiplicative drift, fitness levels, stochastic domination, geometric waiting times
+and first-hitting-time theory — stated for general stochastic processes rather than for a
+single algorithm.
+
+Current promoted checkpoint: **Stage 79 fix 1**. No active Stage-80 candidate.
+
+## How the claims are kept honest
+
+A green build is not a true theorem. `lake build` therefore also runs `ECRuntimeTest/`:
+
+| Check | What it catches |
+|---|---|
+| **Axiom audit** | Every facade theorem must depend on exactly `propext`, `Classical.choice`, `Quot.sound` — a `sorry` laundered through a helper lemma still fails. |
+| **Statement pins** | The elaborated type of each promoted theorem is frozen, so a statement cannot be quietly weakened to make a proof close. |
+| **Non-vacuity witnesses** | Concrete witnesses discharge every hypothesis, so no theorem can be vacuously true. |
+
+The full promotion gate — root aggregator, hygiene, cache, focused build, complete root
+build, zero-diagnostics scan, test suite, export — runs via:
+
+```
+pwsh -File scripts/verify.ps1 -Stage <N> -Focus ECRuntime.<Module>
+```
+
 Warnings count as failures.
 
-## Main formalized layers
+## What this does *not* claim
 
-### Stochastic-process semantics
+The project separates a *certified paper-level result* from a *certified supporting chain*
+and from *reusable infrastructure*, and records which is which for every entry. Several
+headline theorems from the literature are deliberately not claimed, and the hypotheses in
+force are stated explicitly. The list is in
+[`docs/FORMALIZED_RESULTS_AND_LITERATURE_FRONTIER.md`](docs/FORMALIZED_RESULTS_AND_LITERATURE_FRONTIER.md)
+§3.15.
 
-The repository contains finite and infinite trajectory semantics for stochastic transition systems, including finite path weights, projective consistency, Markov-kernel/Ionescu–Tulcea trajectories, finite-marginal identification, first-hitting-time semantics, and unrestricted-runtime bridges.
+## Documentation
 
-### Generic runtime tools
-
-The reusable analysis layer contains additive and multiplicative drift, fitness levels, stochastic domination, geometric waiting times and sums, coupling/residence infrastructure, and geometric/shifted-exponential tail bounds.
-
-### LeadingOnes
-
-The LeadingOnes development contains exact first-entry, residence, occupation, and renewal arguments and culminates in exact expected-runtime results with standard/scaled mutation-rate interfaces. The public entry point is `ECRuntime.LeadingOnesMainResults`.
-
-### Linear functions / Witt analysis
-
-The linear-function development formalizes the Witt-style potential argument and separates potential/drift decomposition, C2/C3 and strict-tail analysis, exact-singleton-rate multiplicative drift, generic expectation/tail consequences, and fixed-scale asymptotics.
-
-**Hypothesis in force.** These results assume *positive nonincreasing* weights
-(`PositiveLinearWeights` and `NonincreasingLinearWeights`). The reduction of an arbitrary
-positive linear function to a sorted one is routine on paper but is **not** formalized here,
-so the certified statements cover sorted weight vectors rather than all linear functions.
-
-The finite-boundary branch is now frozen at the exact natural boundary `c <= log 3`. Important maintained modules include:
-
-- `WittMutationPotential.lean`
-- `WittMutationDrift.lean`
-- `WittMutationCaseC3.lean`
-- `WittMutationC3Envelope.lean`
-- `WittMutationStrictTail.lean`
-- `WittMutationCertifiedRuntime.lean`
-- `WittMutationC3LogThreeRegime.lean`
-- `WittMutationLogThreeRuntime.lean`
-- `WittMutationRateAsymptotics.lean`
-- `WittMutationSharpRuntimeAsymptotics.lean`
-
-`WittMutationC3ExtendedRegime.lean` and `WittMutationExtendedRuntime.lean` remain only as the older `21/20` compatibility/public API layer used by existing asymptotic presentation modules.
-
-### Static unary-unbiased mutation
-
-Stage 68 promotes the operator-level abstraction intended for the next linear-function theorem family. A `StaticUnaryUnbiasedMutation n` is a probability law on mutation masks that is invariant under mask cardinality. Its derived quantities include:
-
-- `radiusMass law k`: probability of flipping exactly `k` bits;
-- `oneBitMass law`: the literature parameter `p₁`;
-- `meanRadius law`: the expected mutation strength `χ`;
-- `singleZeroFlipWeight law x`: aggregate mass of elementary one-bit improvements.
-
-The independent-bit `(1+1)` EA is embedded as `independentBitLaw`, so the new abstraction extends rather than forks the existing mutation semantics.
-
-## Repository design
-
-The intended theorem architecture is:
-
-```text
-algorithm-independent probability/runtime lemma
-        -> operator-specific transition/kernel facts
-        -> objective/potential-specific progress theorem
-        -> generic expectation/tail consequence
-        -> literature-facing asymptotic corollary
-```
-
-Development-history endpoints should not become permanent dependencies. Once a natural theorem boundary is proved, serial numerical endpoint modules are removed in favor of generic certificates and final specializations.
-
-## Development workflow
-
-See `DEVELOPMENT.md`. In particular:
-
-- the pinned user build is authoritative for promotion;
-- warnings fail promotion;
-- every substantive round returns a full repository ZIP plus a safe overlay/patch;
-- generated logs/build products are not retained in the source tree;
-- the verification runner performs focused candidate builds, one complete root build, diagnostics, and a whitelist-based source export.
-
-## Next research step
-
-Stage 79 fix 1 is the latest promoted checkpoint. No Stage-80 theorem is introduced in this repository-state update. The immediate proof boundary remains to uncondition the promoted right-loss proxy into the actual event-weighted right contribution and combine it with the promoted Stage-79 singleton left contribution to obtain the corrected per-pivot drift inequality. A broader, literature-derived menu of subsequent targets is recorded in `docs/FORMALIZED_RESULTS_AND_LITERATURE_FRONTIER.md`; the shorter proof-order roadmap remains in `docs/LITERATURE_ROADMAP.md`.
+| File | What it holds |
+|---|---|
+| [`DEVELOPMENT.md`](DEVELOPMENT.md) | Invariant workflow rules: promotion criterion, proof architecture, verification runners, export discipline. |
+| [`HISTORY.md`](HISTORY.md) | Chronological stage and fix milestones. |
+| [`docs/FORMALIZED_RESULTS_AND_LITERATURE_FRONTIER.md`](docs/FORMALIZED_RESULTS_AND_LITERATURE_FRONTIER.md) | Full catalogue of what is proved, with provenance, status vocabulary, and the next-paper frontier. |
+| [`docs/LITERATURE_ROADMAP.md`](docs/LITERATURE_ROADMAP.md) | Literature mapping, proof order, and the near-term plan. |
+| [`docs/PROJECT_STATE.tex`](docs/PROJECT_STATE.tex) | Current mathematical state and promoted boundary, with display equations. |
