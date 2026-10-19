@@ -1,0 +1,246 @@
+# ECRuntime formalization queue -- machine-readable single source of truth.
+#
+# "What to do next" previously lived as prose in six documents at three time
+# horizons. This file holds the structured form; the prose keeps its own voice
+# and `scripts/hygiene.py` can cross-check the two.
+#
+# status values:
+#   promoted  -- compiler-promoted, full gate green
+#   active    -- the current stage target
+#   open      -- ready to attempt, dependencies met
+#   blocked   -- needs a semantic framework the repository lacks
+#
+# Ingredients are the near-term dependency ledger for the active paper (A1).
+# Targets are the literature frontier: 35 entries across 33 papers, tiered by
+# how much new semantic machinery each one forces.
+
+[meta]
+checkpoint = "stage-79-fix-1"
+active_target = "A1"
+toolchain = "leanprover/lean4:v4.32.1"
+mathlib = "v4.32.1"
+
+# --- Near-term ingredient ledger (Doerr-Janett-Lengler 2024) -----------------
+
+[[ingredient]]
+id = 1
+text = "static unary-unbiased operator law, radius masses, p1, chi, singleton weights"
+status = "promoted"
+promoted_at = "stage-68-fix-1"
+
+[[ingredient]]
+id = 2
+text = "drift as mask sum, exact singleton contribution, multiplicative drift at p1/n"
+status = "promoted"
+promoted_at = "stage-69-fix-1"
+
+[[ingredient]]
+id = 3
+text = "coordinate-flip mass, swap invariance, Pr[i flips] = chi/n, radius moments"
+status = "promoted"
+promoted_at = "stage-70-fix-1"
+
+[[ingredient]]
+id = 4
+text = "pair-event symmetry and the first two-coordinate bounds"
+status = "promoted"
+promoted_at = "stage-71"
+
+[[ingredient]]
+id = 5
+text = "exact ordered-pair double count and n(n-1) normalization"
+status = "promoted"
+promoted_at = "stage-72"
+
+[[ingredient]]
+id = 6
+text = "accepted-event mass bridge, conditional coefficient E[K(K-1)]/(p1(n-1))"
+status = "promoted"
+promoted_at = "stage-73"
+
+[[ingredient]]
+id = 7
+text = "concrete positive-linear accepted pivot events, pivot-event mass bound chi/n"
+status = "promoted"
+promoted_at = "stage-74"
+
+[[ingredient]]
+id = 8
+text = "accepted-event left/right split, exact Delta_L + Delta_R, right-loss proxy"
+status = "promoted"
+promoted_at = "stage-75"
+
+[[ingredient]]
+id = 9
+text = "corrected potential rho calibration, anchor envelope, gamma-tail identity, right-loss envelope"
+status = "promoted"
+promoted_at = "stage-78-fix-2"
+
+[[ingredient]]
+id = 10
+text = "event-weighted right-loss unconditioning and per-pivot drift assembly, then a global multiplicative-drift lower bound and runtime/tail/asymptotic corollaries"
+status = "open"
+depends_on = ["stage-74", "stage-75", "stage-79-fix-1"]
+plan = [
+  "relate event mass times the promoted conditional right-loss proxy to the actual event-weighted right loss, using the pivot-event upper mass chi/n",
+  "combine that with the promoted Stage-79 singleton left contribution to obtain the corrected per-pivot drift inequality",
+  "determine the strongest valid global multiplicative-drift theorem under the resulting factorial-moment condition",
+  "only if an additional argument recovers a mean-only estimate should the original chi-only statement be reinstated",
+]
+
+# --- Tier A: immediate continuations of the current proof chain --------------
+
+[[target]]
+id = "A1"
+paper = "Doerr, Janett & Lengler (2024), Algorithmica 86(10) 3115-3152"
+doi = "10.1007/s00453-024-01258-9"
+goal = "finish the static unary-unbiased linear theorem (upper bound)"
+new_framework = "none"
+status = "active"
+note = "the published Lemma 9 conditional step does not survive formalization; see FORMALIZED_RESULTS section 3.9"
+
+[[target]]
+id = "A2"
+paper = "Witt (2013), Combinatorics Probability and Computing 22(2)"
+doi = "10.1017/S0963548312000600"
+goal = "extend p = c/n from c <= log 3 to all fixed c > 0, sharp factor e^c/c"
+new_framework = "none"
+status = "open"
+note = "obstacle is the finite drift certificate outside C3, not the semantics"
+
+[[target]]
+id = "A3"
+paper = "Witt (2013), second target"
+doi = "10.1017/S0963548312000600"
+goal = "matching lower bound and optimality of c = 1"
+new_framework = "process-level lower-bound theorem"
+status = "open"
+
+[[target]]
+id = "A4"
+paper = "Doerr & Goldberg (2013), Algorithmica 65(1) 224-250"
+doi = "10.1007/s00453-011-9585-3"
+goal = "Theta(n log n) for every linear objective at every constant c/n"
+new_framework = "objective-dependent drift functions"
+status = "open"
+
+[[target]]
+id = "A5"
+paper = "Doerr, Johannsen & Winzen, Non-Existence of Linear Universal Drift Functions"
+arxiv = "1011.3466"
+goal = "structural impossibility theorem complementing the positive Witt results"
+new_framework = "none"
+status = "open"
+
+[[target]]
+id = "A6"
+paper = "Jaegerskuepper (2008), PPSN X, LNCS 5199 41-51"
+doi = "10.1007/978-3-540-87700-4_5"
+goal = "Markov-chain/drift blend; may expose reusable monotonicity lemmas"
+new_framework = "none"
+status = "open"
+
+[[target]]
+id = "A7"
+paper = "Lengler & Spooner (2015), FOGA XIII 52-61"
+doi = "10.1145/2725494.2725506"
+goal = "fixed-budget performance on linear functions"
+new_framework = "expected potential after a fixed step count"
+status = "open"
+
+[[target]]
+id = "A8"
+paper = "Einarsson, Gauy, Lengler, Meier, Mujika, Steger & Weissenberger (2019), TCS 785 150-170"
+doi = "10.1016/j.tcs.2019.05.021"
+goal = "Linear Hidden Subset; scheduled constant beta ~ 3.552"
+new_framework = "time-dependent mutation schedule"
+status = "open"
+
+# --- Tier B: close extensions of existing LeadingOnes / drift machinery ------
+
+[[target]]
+id = "B1"
+paper = "Boettcher, Doerr & Neumann (2010)"
+goal = "optimal static LeadingOnes rate p ~ 1.59/n, runtime ~ 0.77 n^2"
+new_framework = "none (real asymptotic optimization)"
+status = "open"
+
+[[target]]
+id = "B2"
+paper = "Boettcher, Doerr & Neumann (2010), second target"
+goal = "fitness-dependent adaptive rate, ~ 0.68 n^2"
+new_framework = "state-dependent mutation kernel"
+status = "open"
+
+[[target]]
+id = "B4"
+paper = "Doerr (2019), TCS 773 115-137"
+goal = "fastest unary-unbiased LeadingOnes algorithms"
+new_framework = "none"
+status = "open"
+note = "one of the strongest intersections of two already-developed branches"
+
+[[target]]
+id = "B6"
+paper = "Lehre & Witt, General Drift Analysis with Tail Bounds"
+arxiv = "1307.2559"
+goal = "general variable-drift with upper and lower tails"
+new_framework = "variable drift"
+status = "open"
+note = "would unify several existing modules and unlock later papers"
+
+[[target]]
+id = "B9"
+paper = "Doerr & Koetzing (2024), Algorithmica 86 367-395"
+doi = "10.1007/s00453-022-00952-w"
+goal = "lower bounds from fitness levels via visitation probabilities"
+new_framework = "lower-bound fitness-level interface"
+status = "open"
+note = "recommended as the preferred lower-bound interface; formalization order item 2"
+
+# --- Tier C / D: require substantial new semantic frameworks -----------------
+
+[[target]]
+id = "C11"
+paper = "Lengler (2020), IEEE TEC 24(6) 995-1009"
+doi = "10.1109/TEVC.2019.2917014"
+goal = "monotone-function dichotomy, key parameter m2/m1"
+new_framework = "monotone function family"
+status = "open"
+note = "exceptionally close to the current interface: meanRadius is m1, secondFactorialRadiusMoment is exactly m2"
+
+[[target]]
+id = "C9"
+paper = "Buzdalov & Doerr (2021), GECCO 660-668"
+doi = "10.1145/3449639.3459389"
+goal = "optimal static distributions over mutation strengths"
+new_framework = "none"
+status = "open"
+note = "unusually natural: the repository already represents an arbitrary static radius distribution"
+
+[[target]]
+id = "D1"
+paper = "Antipov & Doerr (2021), ACM TELO 1(4) Art. 13"
+doi = "10.1145/3469800"
+goal = "precise plateau runtimes for arbitrary unbiased operators"
+new_framework = "plateau semantics"
+status = "open"
+note = "most direct non-linear application of the Stage-68 operator abstraction"
+
+[[target]]
+id = "C1"
+paper = "Lehre & Witt (2012), Algorithmica 64(4) 623-642"
+doi = "10.1007/s00453-012-9616-8"
+goal = "unbiased black-box model and Omega(n log n) lower bounds"
+new_framework = "algorithm/query-history black-box model"
+status = "blocked"
+
+[[target]]
+id = "E1"
+paper = "population and crossover results, e.g. the (1+(lambda,lambda)) GA"
+goal = "population-based runtime analysis"
+new_framework = "population states, multi-stage iterations, crossover kernels"
+status = "blocked"
+
+# Recommended order (FORMALIZED_RESULTS section 7): A1, B9, B1/B2, A2/A4, C1, C11, D1.
+# Not a ranking supplied by the cited literature -- a repository-engineering judgement.

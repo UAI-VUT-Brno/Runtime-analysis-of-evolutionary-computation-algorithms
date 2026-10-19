@@ -1,0 +1,10 @@
+# Line endings are normalised to LF in the repository and in every checkout, so that a
+# Windows clone does not rewrite the working tree and shell scripts committed from here
+# stay usable on Linux. This overrides core.autocrlf for everyone who clones.
+* text=auto eol=lf
+
+# Never normalise these.
+*.zip  binary
+*.png  binary
+*.jpg  binary
+*.pdf  binary

@@ -1,0 +1,293 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=28mm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage[T1]{fontenc}
+
+\newcommand{\EA}{(1+1)\text{-EA}}
+\newcommand{\runtimeSup}{\operatorname{runtimeSup}}
+
+\title{Formal Runtime Analysis of Evolutionary Algorithms in Lean\\
+\large Current Verified State and Development Frontier}
+\author{ECRuntime project}
+\date{25 September 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This note records the current mathematical and formalization state of the
+\texttt{ECRuntime} Lean project after the clean Stage~79 fix~1 verification. The project
+provides reusable stochastic-process and runtime-analysis machinery for evolutionary
+computation and applies it to OneMax, LeadingOnes, and arbitrary positive ordered linear
+functions. Stage~79 fix~1 is the latest compiler-promoted checkpoint: it promotes the
+corrected factorial-moment chain through the closed gamma-tail identity, the corrected
+suffix-ratio geometry, pointwise nonnegative accepted left contribution, exact singleton
+left gain, and event-weighted lower bound $(p_1/n)g_i$. There is no active Stage~80
+theorem candidate in this repository-state checkpoint.
+\end{abstract}
+
+\section{Verification boundary}
+
+The project is pinned to Lean~4.32.1 and Mathlib~v4.32.1. The returned Stage~79 fix~1 verification is warning/error-free for \texttt{StaticUnaryUnbiasedCorrectedLeftGain}, the complete root build, repository export, and source-hygiene checks. Consequently Stage~79 fix~1 is compiler promoted.
+
+Consequently, for arbitrary positive nonincreasing linear weights, the finite Witt line
+is compiler promoted through
+\[
+  0\le c\le\log 3,\qquad n\ge4,
+\]
+with final runtime interfaces on $0<c\le\log3$.
+
+For
+\[
+  q_n(c)=\frac{c}{n}\left(1-\frac{c}{n}\right)^{n-1},
+\]
+the fixed-scale asymptotic layer proves for every fixed $c>0$
+\[
+  n q_n(c)\longrightarrow c e^{-c},
+  \qquad
+  (nq_n(c))^{-1}\longrightarrow \frac{e^c}{c}.
+\]
+The leading factor $e^c/c$ is minimized at $c=1$.
+
+\section{Reusable formal infrastructure}
+
+\subsection{Trajectory semantics}
+
+The repository contains finite path weights and consistency, stochastic transition
+kernels, Ionescu--Tulcea infinite trajectories, finite-marginal identification, and
+least-index first-hitting-time semantics. These bridges allow finite-state recurrence
+arguments and sample-path runtime statements to share a common formal foundation.
+
+\subsection{Runtime theory}
+
+Reusable analysis includes additive and multiplicative drift, fitness-level bounds,
+stochastic domination, geometric waiting variables and finite sums, level-exit/residence
+infrastructure, and geometric/shifted-exponential runtime tails.
+
+\section{Completed application: LeadingOnes}
+
+The LeadingOnes development is exposed through
+\texttt{ECRuntime.LeadingOnesMainResults}. It includes first-crossing symmetry, exact
+entry distributions, residence and occupation identities, renewal, and exact expected
+runtime with scaled-rate and standard-rate interfaces.
+
+\section{Completed finite-boundary Witt line}
+
+For $p=c/n$, the closed finite C3 condition is
+\[
+  \left(1-\frac cn\right)^{-(n-1)}+\frac cn\le3.
+\]
+Its limiting boundary is $e^c\le3$. Stage~66 proved the exact endpoint $c=\log3$ by a
+dimension-uniform logarithmic argument, and Stage~67 propagated the resulting certificate
+through the generic expectation and tail machinery.
+
+\texttt{WittMutationC3Envelope.lean} owns endpoint-independent C3 monotonicity;
+\texttt{WittMutationCertifiedRuntime.lean} owns the C3-based finite expectation and tail
+consequences; and \texttt{WittMutationLogThreeRuntime.lean} is the final thin
+specialization. Historical rational endpoints beyond the retained $21/20$ compatibility
+layer have been removed from the maintained proof graph.
+
+This branch is now frozen unless a later theorem family exposes a reusable abstraction
+that genuinely improves it.
+
+\section{New theorem family: static unary-unbiased mutation}
+
+The next target follows the static unary-unbiased linear-function setting. A unary
+unbiased mutation operator on $\{0,1\}^n$ is characterized by choosing a Hamming radius
+and then choosing uniformly among masks of that radius. For runtime analysis the central
+parameters are
+\[
+  p_1=\Pr(\text{flip exactly one bit})
+\]
+and the expected mutation strength
+\[
+  \chi=\mathbb E[\text{number of flipped bits}].
+\]
+
+\subsection{Stage 68 fix 1 promoted operator interface}
+
+Stage~68 fix~1 compiler-promotes \texttt{StaticUnaryUnbiasedMutation.lean}. It represents
+a static unary-unbiased operator by a normalized nonnegative law on mutation masks that
+is invariant under mask cardinality. The module derives the radius masses, their
+normalization, the one-bit mass $p_1$, the mean radius $\chi$, the exact specified
+singleton mass $p_1/n$, aggregate single-zero-flip mass, the independent-bit embedding,
+and the induced elitist stochastic transition.
+
+\subsection{Stage 69 fix 1 promoted: singleton linear drift}
+
+Stage~69 fix~1 compiler-promotes \texttt{StaticUnaryUnbiasedLinearDrift.lean}. It deliberately formalizes
+only the distribution-generic part of the linear-function progress argument:
+\begin{itemize}[nosep]
+  \item a mask-sum formula for one-step drift under the static unary-unbiased transition;
+  \item the named per-coordinate singleton rate $p_1/n$;
+  \item exact contribution $(p_1/n)V(x)$ of zero-singleton events for arbitrary
+        linear-error coefficients;
+  \item specialization to the bounded rank potential;
+  \item an exact decomposition of rank drift into the singleton term and one
+        non-singleton remainder;
+  \item a coefficient-sensitive objective-error multiplicative-drift baseline at rate
+        $p_1/n$.
+\end{itemize}
+
+The candidate does not yet assert a coefficient-independent runtime theorem for general
+static unary-unbiased mutation. That requires a lower bound on the non-singleton
+remainder.
+
+\section{Why this is the next efficient step}
+
+The 2024 static unary-unbiased result has asymptotic scale
+\[
+  (1\pm o(1))\frac{n\log n}{p_1}
+\]
+under additional conditions, including control of the expected mutation strength
+$\chi$. The repository already contains most of the generic trajectory/runtime machinery
+and extensive linear-potential infrastructure. The missing bridge is therefore not a new
+probability space but an operator abstraction exposing $p_1$ and the multi-bit radius
+profile cleanly.
+
+Stage~68 created precisely that interface. Stage~69 now consumes it in the exact singleton branch while keeping all multi-bit corrections explicit.
+
+\section{Stage 70 fix 1 promoted: coordinate marginals}
+
+Stage~70 fix~1 compiler-promotes \texttt{StaticUnaryUnbiasedFlipMarginals.lean}. Its primary theorem is
+\[
+  \Pr(i\text{ flips})=\frac{\chi}{n}
+\]
+for every specified coordinate in positive dimension. The module also promotes the unconditional shifted radius moment and the second factorial radius moment
+\[
+  \sum_k k(k-1)p_k,
+\]
+which is the correct distributional quantity for two-coordinate flip events.
+
+\section{Stage 71 fix 1 promoted: pair marginals}
+
+Stage~71 fix~1 compiler-promotes \texttt{StaticUnaryUnbiasedPairMarginals.lean}. It defines the event mass that two specified coordinates flip, proves equality of this mass for all distinct coordinate pairs by swap symmetry, bounds it by the promoted coordinate marginal $\chi/n$, and rewrites the second factorial radius moment as the mask expectation of $|M|(|M|-1)$.
+
+\section{Stage 72 fix 1 promoted: exact pair normalization}
+
+Stage~72 fix~1 compiler-promotes \texttt{StaticUnaryUnbiasedPairNormalization.lean}. It double-counts ordered distinct coordinate pairs inside each mask, identifies their aggregate mass with $\mathbb E[K(K-1)]$, and combines this identity with Stage~71 exchangeability to obtain
+\[
+  \Pr(i,j\text{ flip})=\frac{\mathbb E[K(K-1)]}{n(n-1)}
+\]
+for distinct $i,j$ and $n\ge2$. When $\chi>0$, dividing by the promoted coordinate marginal gives the exact size-biased conditional ratio
+\[
+  \frac{\Pr(i,j\text{ flip})}{\Pr(j\text{ flips})}
+  =\frac{\mathbb E[K(K-1)]}{\chi(n-1)}.
+\]
+No bound replacing the factorial moment by a function of $\chi$ alone is asserted.
+
+The first Stage~72 compiler run exposed only local proof-engineering issues. Stage~72 fix~1 repaired those points, and the focused module plus complete root build then verified warning/error-free. The exact pair normalization and size-biased ratio are therefore compiler promoted.
+
+\section{Stage 73 promoted: generic event-mass bridge}
+
+Stage~73 compiler-promotes \texttt{StaticUnaryUnbiasedAcceptedEventBridge.lean}. For a finite mask event $A$ that contains the singleton $\{i\}$ and is supported on masks flipping $i$, the event mass of outcomes in $A$ that also flip a distinct coordinate $j$ is at most the promoted pair mass, while $A$ itself has mass at least $p_1/n$. Hence, for $p_1>0$,
+\[
+  \Pr(j\text{ flips}\mid A)\le
+  \frac{\mathbb E[K(K-1)]}{p_1(n-1)}.
+\]
+The theorem is kept at the finite event-mass level. Stage~74 instantiates it with the concrete accepted leftmost-error pivot events of the linear-function proof without introducing an incorrect mean-only conditioning law.
+
+
+\section{Stage 74 fix 1 promoted: concrete accepted pivot events}
+
+Stage~74 fix~1 compiler-promotes \texttt{StaticUnaryUnbiasedLinearAcceptedEvents.lean}. Because this repository maximizes positive linear functions toward the all-one string and numbers the most important coordinate first, the paper's leftmost flipped error bit is represented as a currently-zero pivot $i$ such that no smaller-index zero-to-one flip occurs. The event additionally requires elitist acceptance.
+
+The promoted module proves pivot support, pivot zero status, acceptance, the leftmost/minimal-index property, singleton inclusion for positive linear weights, and pairwise disjointness of distinct pivot events. Under $p_1>0$ it proves positive event mass and instantiates the Stage~73 bridge to obtain
+\[
+  \Pr(j\text{ flips}\mid A_i)\le
+  \frac{\mathbb E[K(K-1)]}{p_1(n-1)}.
+\]
+
+\section{Stage 75 fix 1 promoted: accepted-event left/right loss decomposition}
+
+Stage~75 fix~1 compiler-promotes \texttt{StaticUnaryUnbiasedLinearLossDecomposition.lean}. It partitions currently-one coordinates around an abstract anchor and proves the exact accepted weighted-error decomposition
+\[
+  \Delta=\Delta_L+\Delta_R.
+\]
+For nonnegative coefficients it also sums the promoted Stage~74 per-coordinate estimate over the right region, retaining the exact factorial-moment coefficient
+\[
+  \frac{\mathbb E[K(K-1)]}{p_1(n-1)}.
+\]
+
+\section{Stage 76 fix 1 promoted: corrected potential calibration}
+
+Stage~76 fix~1 compiler-promotes \texttt{StaticUnaryUnbiasedCorrectedPotential.lean}. Combining the promoted event-mass bound $\chi/n$ with the Stage~75 conditional coefficient and normalizing by the singleton rate $p_1/n$ yields the corrected dimensionless penalty
+\[
+  \rho=\frac{\chi\,\mathbb E[K(K-1)]}{(n-1)p_1^2}.
+\]
+The promoted module proves this calibration identity exactly, defines the geometric baseline $1+\alpha\rho$, and in the repository's reversed coordinate convention sets
+\[
+  \gamma_i=(1+\alpha\rho)^{n-1-i}.
+\]
+For positive nonincreasing objective weights it constructs the clipped coefficient through the finite suffix minimum
+\[
+  g_i=\min_{j\ge i}\gamma_j\frac{w_i}{w_j},
+\]
+retaining a concrete minimizing suffix coordinate as the reversed anchor. It proves anchor membership/minimality, $1\le g_i\le\gamma_i$, nonnegativity, and the all-ones target characterization of the resulting potential. The first Stage~76 build exposed only elaboration/linter issues; Fix~1 made suffix finiteness explicit and removed a redundant tactic, after which the focused and full builds verified warning/error-free.
+
+\section{Stage 77 fix 1 and Stage 78 fix 2 promoted: closed corrected gamma tail}
+
+Stage~77 fix~1 compiler-promotes \texttt{StaticUnaryUnbiasedCorrectedPotentialEnvelope.lean}. It proves the exact anchor-candidate representation
+\[
+  g_i=\gamma_{a(i)}\frac{w_i}{w_{a(i)}}
+\]
+and, for positive nonincreasing objective weights, the lower envelope $\gamma_{a(i)}\le g_i$. It also promotes the corrected-potential $L/R$ specialization and the reduction of the complete conditional right-region loss to the pure gamma suffix tail.
+
+Stage~78 adds \texttt{StaticUnaryUnbiasedCorrectedGammaTail.lean}. With $\rho$ denoting the promoted corrected penalty ratio and $\gamma_i=(1+\alpha\rho)^{n-1-i}$, it evaluates the strict suffix geometrically and proves
+\[
+  \Gamma_{>k}(\alpha\rho)=\gamma_k-1.
+\]
+For $\alpha>0$ this implies $\rho\Gamma_{>a(i)}\le g_i/\alpha$. Combining this with the promoted calibration identity converts the Stage~77 conditional right-loss envelope into singleton-rate units. The next boundary is the actual pivot-event mass/left-gain assembly and then the global multiplicative-drift theorem.
+
+The first Stage~78 pinned build found no mathematical counterexample: it failed only in the inverse finite-suffix reindexing constructor, where an `omega` call could not see through the newly constructed `Fin` value. Stage~78 fix~1 moved the natural-number side conditions outside that constructor. The next pinned build confirmed the constructor repair and localized the only remaining errors to the `left_inv` and `right_inv` laws of the same equivalence, where `omega` could not normalize the opaque composed maps. Stage~78 fix~2 exposes the two involution equalities explicitly before arithmetic automation. All Stage~78 theorem statements remain unchanged. The Stage~78-fix~2 focused and root builds then verified warning/error-free, so this closed gamma-tail layer is now promoted.
+
+\section{Lemma 9 audit before further formalization}
+
+The published 2024 proof bounds a conditional pair-flip probability in Lemma~9. Its displayed equation~(27), however, conditions on one specified coordinate being flipped and then averages $(k-1)/(n-1)$ against the original radius probabilities $p_k$. Conditioning on a specified flipped coordinate size-biases the radius law by a factor $k/\chi$, so this displayed step is not valid for an arbitrary radius law as written.
+
+A simple diagnostic family shows why mean control alone cannot justify that intermediate inequality: take $p_1=1/2$, $p_n=1/(2n)$ and $p_0=1/2-1/(2n)$. Then $\chi=1$, but for two distinct coordinates the conditional probability that the first flips given that the second flips is $1/2$, whereas $\chi/(n-1)=1/(n-1)$. For $n\ge4$ the claimed generic conditional bound fails.
+
+Therefore the repository does not encode the mean-only pair bound as a theorem. Stage~71 isolates pair-event symmetry, Stage~72 compiler-promotes exact pair normalization, and Stage~73 compiler-promotes the generic corrected event-mass coefficient based on $\mathbb E[K(K-1)]$. Stage~74 fix~1 now compiler-promotes the objective-specific accepted leftmost-error events and instantiates this bridge. Stage~75 fix~1 compiler-promotes the generic left/right decomposition and propagates the same factorial-moment coefficient over the whole right region. Stage~76 fix~1 now compiler-promotes the potential calibration directly to that verified coefficient, and Stage~77 reduces the right-loss term to a pure geometric tail. If later drift assembly does not recover a stronger estimate, the runtime theorem must retain a second-factorial-moment parameter or state an explicit additional moment hypothesis.
+
+\section{Stage 79 fix 1 promoted: corrected left gain}
+
+Stage~79 fix~1 compiler-promotes \texttt{StaticUnaryUnbiasedCorrectedLeftGain.lean}. The new layer proves
+that the corrected potential-to-objective ratio is nondecreasing along a pivot suffix,
+\[
+  \frac{g_i}{w_i}\le \frac{g_q}{w_q}\qquad(i\le q),
+\]
+and that every coordinate on the left-loss side of the corrected anchor satisfies
+\[
+  \frac{g_j}{w_j}\le \frac{g_i}{w_i}\qquad(j\le a(i)).
+\]
+Together with objective acceptance these ratio envelopes imply the pointwise inequality
+$\Delta_L(i)\ge0$ for every mask in the accepted pivot event.  The singleton pivot mask
+has exactly $\Delta_L(i)=g_i$, so the event-weighted left contribution is at least
+$(p_1/n)g_i$.  The first pinned Stage~79 build exposed only local proof-engineering
+issues: an unused simplifier hypothesis, a hidden proof of $n>0$, and an elaboration
+failure in the singleton lower-bound summation step. Stage~79 fix~1 repaired only those
+points and preserved the complete theorem surface. The focused Stage~79-fix~1 build and
+the complete root build then verified warning/error-free, so this corrected-left-gain
+layer is now promoted. The remaining local task is to uncondition the promoted right-loss
+proxy into the actual event-weighted right contribution and combine the two terms into
+the corrected per-pivot drift inequality.
+
+
+\section{Repository literature checkpoint after Stage 79 fix 1}
+
+No Stage~80 theorem is introduced in this checkpoint.  The certified theorem inventory,
+its mapping to the originating EC literature, the current limitations of each paper-level
+formalization, and a refreshed survey of more than twenty reachable next papers are
+recorded in
+\texttt{docs/FORMALIZED\_RESULTS\_AND\_LITERATURE\_FRONTIER.md}.
+The survey is dated 2026-09-25 and separates compiler-certified paper-level results,
+certified supporting chains whose headline theorem is not yet closed, and generic
+infrastructure.  In particular, it records explicitly that the 2024 static unary-unbiased
+headline theorem has not yet been certified under the paper's published assumptions;
+the repository continues with the exact factorial-moment correction exposed by the
+Stage~70--79 chain.
+
+\end{document}

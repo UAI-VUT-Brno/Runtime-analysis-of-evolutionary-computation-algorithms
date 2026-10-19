@@ -1,0 +1,42 @@
+# Lean/Lake generated files
+.lake/
+
+# Verification outputs
+.verify/
+*_build_results/
+*_build_results.zip
+*_review.txt
+*.log
+
+# Repository exports
+ECRuntime_stage*_repository.zip
+ECRuntime_stage*_repository.zip.sha256
+ECRuntime_stage*_repository.manifest.txt
+# Written into the export ZIP by scripts/export_repository.ps1, never onto disk and
+# never a maintained source file (it is absent from the exporter's root whitelist).
+# A copy in the working tree is a leftover from the earlier Python exporter.
+# See DEVELOPMENT.md section 6.
+EXPORT_MANIFEST.txt
+
+# Patch artifacts
+stage*_patch.zip
+stage*_overlay.zip
+
+# Python bytecode caches, generated whenever a scripts/*.py module is imported
+__pycache__/
+*.py[cod]
+
+# Agent working rules and harness configuration -- deliberately not versioned.
+# The guard scripts themselves live in scripts/hooks/ and are versioned like any other
+# script; only the wiring that invokes them, and the prose rules, stay on the machine.
+CLAUDE.md
+SOUL.md
+.claude/
+
+# Editor / OS artifacts
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*~
+*.swp
