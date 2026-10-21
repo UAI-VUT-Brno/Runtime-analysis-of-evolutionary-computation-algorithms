@@ -69,7 +69,20 @@ theorem maskEventMass_le_coordinateFlipMass {n : ℕ}
     (event : Finset (MutationMask n)) (i : Fin n)
     (hsupp : ∀ mask ∈ event, i ∈ mask) :
     law.maskEventMass event ≤ law.coordinateFlipMass i := by
-  sorry
+  let flipEvent : Finset (MutationMask n) :=
+    Finset.univ.filter (fun mask => i ∈ mask)
+  have hsub : event ⊆ flipEvent := by
+    intro mask hmask
+    simp [flipEvent, hsupp mask hmask]
+  have hmass : law.maskEventMass flipEvent = law.coordinateFlipMass i := by
+    unfold maskEventMass flipEvent coordinateFlipMass
+    exact Finset.sum_filter
+      (fun mask : MutationMask n => i ∈ mask)
+      (fun mask : MutationMask n => law.weight mask)
+  calc
+    law.maskEventMass event ≤ law.maskEventMass flipEvent :=
+      law.maskEventMass_mono hsub
+    _ = law.coordinateFlipMass i := hmass
 
 /--
 The promoted exact marginal `Pr[i flips] = chi/n` turns the previous bound into the
@@ -80,7 +93,14 @@ theorem maskEventMass_le_meanRadius_div {n : ℕ}
     (event : Finset (MutationMask n)) (i : Fin n)
     (hsupp : ∀ mask ∈ event, i ∈ mask) :
     law.maskEventMass event ≤ law.meanRadius / (n : ℝ) := by
-  sorry
+  have hn : 0 < n := by
+    have hiLt := i.isLt
+    omega
+  calc
+    law.maskEventMass event ≤ law.coordinateFlipMass i :=
+      law.maskEventMass_le_coordinateFlipMass event i hsupp
+    _ = law.meanRadius / (n : ℝ) :=
+      law.coordinateFlipMass_eq_meanRadius_div hn i
 
 /--
 The concrete accepted leftmost-zero pivot event has mass at most `chi/n`.
@@ -94,7 +114,9 @@ theorem acceptedLeftmostZeroEvent_mass_le_meanRadius_div {n : ℕ}
     (w : Fin n → ℝ) (x : BitString n) (i : Fin n) :
     law.maskEventMass (acceptedLeftmostZeroEvent w x i) ≤
       law.meanRadius / (n : ℝ) := by
-  sorry
+  exact law.maskEventMass_le_meanRadius_div
+    (acceptedLeftmostZeroEvent w x i) i
+    (fun mask hmask => acceptedLeftmostZeroEvent_supports_pivot w x i mask hmask)
 
 /--
 Event-weighted right loss: the Stage-75 pointwise right loss integrated against the mask
@@ -127,7 +149,8 @@ theorem acceptedRightWeightedContribution_eq_neg {n : ℕ}
     (g : Fin n → ℝ) (x : BitString n) (k : Fin n) :
     law.acceptedRightWeightedContribution event g x k =
       -law.acceptedRightWeightedLoss event g x k := by
-  sorry
+  simp [acceptedRightWeightedContribution, acceptedRightWeightedLoss,
+    acceptedRightDelta, mul_neg, Finset.sum_neg_distrib]
 
 /--
 Finite Fubini identity: summing the pointwise right loss against the restricted law is
@@ -144,7 +167,45 @@ theorem acceptedRightWeightedLoss_eq_sum_secondCoordinateSlice_mass {n : ℕ}
     law.acceptedRightWeightedLoss event g x k =
       ∑ j ∈ acceptedRightRegion x k,
         g j * law.maskEventMass (secondCoordinateSlice event j) := by
-  sorry
+  classical
+  have hpoint (mask : MutationMask n) :
+      law.weight mask * acceptedRightLoss g x mask k =
+        ∑ j ∈ acceptedRightRegion x k,
+          (if j ∈ mask then law.weight mask * g j else 0) := by
+    unfold acceptedRightLoss
+    rw [Finset.mul_sum]
+    simp only [acceptedRightRegion, Finset.sum_filter]
+    apply Finset.sum_congr rfl
+    intro j _
+    by_cases hm : j ∈ mask <;>
+      by_cases hx : x j = true <;>
+        by_cases hk : k.val < j.val <;> simp_all
+  have hslice (j : Fin n) :
+      (∑ mask ∈ event, if j ∈ mask then law.weight mask * g j else 0) =
+        g j * law.maskEventMass (secondCoordinateSlice event j) := by
+    unfold maskEventMass secondCoordinateSlice
+    rw [Finset.sum_filter, Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro mask _
+    by_cases hj : j ∈ mask
+    · simp [hj, mul_comm]
+    · simp [hj]
+  unfold acceptedRightWeightedLoss
+  calc
+    (∑ mask ∈ event, law.weight mask * acceptedRightLoss g x mask k) =
+        ∑ mask ∈ event, ∑ j ∈ acceptedRightRegion x k,
+          (if j ∈ mask then law.weight mask * g j else 0) := by
+      apply Finset.sum_congr rfl
+      intro mask _
+      exact hpoint mask
+    _ = ∑ j ∈ acceptedRightRegion x k, ∑ mask ∈ event,
+          (if j ∈ mask then law.weight mask * g j else 0) := by
+      rw [Finset.sum_comm]
+    _ = ∑ j ∈ acceptedRightRegion x k,
+          g j * law.maskEventMass (secondCoordinateSlice event j) := by
+      apply Finset.sum_congr rfl
+      intro j _
+      exact hslice j
 
 /--
 Exact change of measure: event mass times the promoted conditional right-loss proxy is
@@ -163,7 +224,24 @@ theorem maskEventMass_mul_acceptedRightConditionalLossProxy_eq_acceptedRightWeig
     law.maskEventMass event *
         law.acceptedRightConditionalLossProxy event g x k =
       law.acceptedRightWeightedLoss event g x k := by
-  sorry
+  rw [law.acceptedRightWeightedLoss_eq_sum_secondCoordinateSlice_mass event g x k]
+  unfold acceptedRightConditionalLossProxy
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro j _
+  by_cases hm : law.maskEventMass event = 0
+  · have hsub : secondCoordinateSlice event j ⊆ event := by
+      intro mask hmask
+      exact (Finset.mem_filter.mp hmask).1
+    have hsliceZero : law.maskEventMass (secondCoordinateSlice event j) = 0 := by
+      apply le_antisymm
+      · calc
+          law.maskEventMass (secondCoordinateSlice event j) ≤
+              law.maskEventMass event := law.maskEventMass_mono hsub
+          _ = 0 := hm
+      · exact law.maskEventMass_nonneg _
+    simp [hm, hsliceZero]
+  · field_simp [hm]
 
 /--
 On an event of positive mass, the promoted proxy is exactly the conditional expectation
@@ -180,7 +258,11 @@ theorem acceptedRightConditionalLossProxy_eq_div_of_mass_pos {n : ℕ}
     (g : Fin n → ℝ) (x : BitString n) (k : Fin n) :
     law.acceptedRightConditionalLossProxy event g x k =
       law.acceptedRightWeightedLoss event g x k / law.maskEventMass event := by
-  sorry
+  have hne : law.maskEventMass event ≠ 0 := ne_of_gt hmass
+  apply (eq_div_iff hne).2
+  simpa [mul_comm] using
+    (law.maskEventMass_mul_acceptedRightConditionalLossProxy_eq_acceptedRightWeightedLoss
+      event g x k)
 
 /--
 With nonnegative right-region coefficients the conditional right-loss proxy is
@@ -192,7 +274,12 @@ theorem acceptedRightConditionalLossProxy_nonneg {n : ℕ}
     (g : Fin n → ℝ) (x : BitString n) (k : Fin n)
     (hg : ∀ j ∈ acceptedRightRegion x k, 0 ≤ g j) :
     0 ≤ law.acceptedRightConditionalLossProxy event g x k := by
-  sorry
+  unfold acceptedRightConditionalLossProxy
+  apply Finset.sum_nonneg
+  intro j hj
+  exact mul_nonneg (hg j hj)
+    (div_nonneg (law.maskEventMass_nonneg (secondCoordinateSlice event j))
+      (law.maskEventMass_nonneg event))
 
 /--
 Generic unconditioning bound: for an event supported on masks flipping a specified
@@ -212,7 +299,11 @@ theorem acceptedRightWeightedLoss_le_meanFlipRate_mul_proxy {n : ℕ}
     law.acceptedRightWeightedLoss event g x k ≤
       (law.meanRadius / (n : ℝ)) *
         law.acceptedRightConditionalLossProxy event g x k := by
-  sorry
+  rw [← law.maskEventMass_mul_acceptedRightConditionalLossProxy_eq_acceptedRightWeightedLoss
+    event g x k]
+  exact mul_le_mul_of_nonneg_right
+    (law.maskEventMass_le_meanRadius_div event i hsupp)
+    (law.acceptedRightConditionalLossProxy_nonneg event g x k hg)
 
 /-- The same unconditioning bound on the concrete accepted leftmost-zero pivot event. -/
 theorem acceptedLeftmostZeroEvent_rightWeightedLoss_le_meanFlipRate_mul_proxy {n : ℕ}
@@ -223,7 +314,10 @@ theorem acceptedLeftmostZeroEvent_rightWeightedLoss_le_meanFlipRate_mul_proxy {n
       (law.meanRadius / (n : ℝ)) *
         law.acceptedRightConditionalLossProxy
           (acceptedLeftmostZeroEvent w x i) g x k := by
-  sorry
+  exact law.acceptedRightWeightedLoss_le_meanFlipRate_mul_proxy
+    (acceptedLeftmostZeroEvent w x i) i
+    (fun mask hmask => acceptedLeftmostZeroEvent_supports_pivot w x i mask hmask)
+    g x k hg
 
 /--
 Drift-ready event-weighted right loss in singleton-rate units.
@@ -251,7 +345,27 @@ theorem acceptedLeftmostZeroEvent_correctedRightWeightedLoss_le_singletonRate_we
         (law.correctedAnchor alpha w i) ≤
       (law.oneBitMass / (n : ℝ)) *
         (law.correctedPotentialWeight alpha w i / alpha) := by
-  sorry
+  have hg : ∀ j ∈ acceptedRightRegion x (law.correctedAnchor alpha w i),
+      0 ≤ law.correctedPotentialWeight alpha w j := by
+    intro j _
+    exact law.correctedPotentialWeight_nonneg (le_of_lt halpha) w hw hmono j
+  calc
+    law.acceptedRightWeightedLoss
+        (acceptedLeftmostZeroEvent w x i)
+        (law.correctedPotentialWeight alpha w) x
+        (law.correctedAnchor alpha w i) ≤
+      (law.meanRadius / (n : ℝ)) *
+        law.acceptedRightConditionalLossProxy
+          (acceptedLeftmostZeroEvent w x i)
+          (law.correctedPotentialWeight alpha w) x
+          (law.correctedAnchor alpha w i) :=
+      law.acceptedLeftmostZeroEvent_rightWeightedLoss_le_meanFlipRate_mul_proxy
+        w (law.correctedPotentialWeight alpha w) x i
+        (law.correctedAnchor alpha w i) hg
+    _ ≤ (law.oneBitMass / (n : ℝ)) *
+        (law.correctedPotentialWeight alpha w i / alpha) :=
+      law.meanFlipRate_mul_correctedRightConditionalLossProxy_le_singletonRate_weight_div
+        hn hp1 halpha w hw hmono x i hi
 
 /--
 Sign-normalized form of the previous bound: the event-weighted `R` contribution of the
@@ -273,7 +387,10 @@ theorem neg_singletonRate_correctedWeight_div_le_acceptedRightWeightedContributi
         (acceptedLeftmostZeroEvent w x i)
         (law.correctedPotentialWeight alpha w) x
         (law.correctedAnchor alpha w i) := by
-  sorry
+  rw [law.acceptedRightWeightedContribution_eq_neg]
+  exact neg_le_neg
+    (law.acceptedLeftmostZeroEvent_correctedRightWeightedLoss_le_singletonRate_weight_div
+      hn hp1 halpha w hw hmono x i hi)
 
 end StaticUnaryUnbiasedMutation
 end ECRuntime

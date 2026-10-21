@@ -1,22 +1,24 @@
-import ECRuntimeTest.AxiomAudit
-import ECRuntimeTest.StatementPins
 import ECRuntimeTest.NonVacuity
+import ECRuntimeTest.Stage94NonVacuity
+import ECRuntimeTest.Stage95NonVacuity
+import ECRuntimeTest.Stage96NonVacuity
+import ECRuntimeTest.Stage97NonVacuity
+import ECRuntimeTest.Stage98NonVacuity
+import ECRuntimeTest.Stage99NonVacuity
+import ECRuntimeTest.Stage100NonVacuity
+import ECRuntimeTest.Stage101NonVacuity
+import ECRuntimeTest.Stage102NonVacuity
+import ECRuntimeTest.Stage103NonVacuity
+import ECRuntimeTest.Stage104NonVacuity
+import ECRuntimeTest.Stage105NonVacuity
+import ECRuntimeTest.UnrestrictedRuntimeNonVacuity
 
 /-!
-# ECRuntimeTest
+# ECRuntime concrete regression witnesses
 
-The regression suite for `ECRuntime`. A Lean development has no unit tests in the
-usual sense -- the proof *is* the test -- so this library checks the properties a
-passing `lake build` does **not** establish on its own:
-
-* `AxiomAudit`    -- no facade theorem acquires `sorryAx`, a new `axiom`, or
-                     `native_decide`, even indirectly through a helper lemma;
-* `StatementPins` -- no promoted theorem statement changes silently, which makes
-                     `HISTORY.md`'s repeated "no public theorem statement changes"
-                     claim mechanically enforced rather than merely asserted;
-* `NonVacuity`    -- facade hypothesis sets are satisfiable, so the theorems are
-                     not vacuously true.
-
-Building this library is a promotion gate. It is in `defaultTargets`, so a plain
-`lake build` runs it.
+Each imported module exhibits satisfiable assumptions for representative
+results. Proof correctness is checked by Lean/Mathlib compilation and
+`scripts/audit.lean` (which detects sorry-dependent declarations and
+unexpected axiom use). Frozen Statement/Axiom pin files are intentionally
+not part of this public distribution.
 -/

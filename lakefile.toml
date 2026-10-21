@@ -13,7 +13,7 @@ rev = "v4.32.1"
 [[lean_lib]]
 name = "ECRuntime"
 
-# Regression suite: axiom audit, statement pins, non-vacuity witnesses.
+# Regression suite: concrete non-vacuity witnesses; proof hygiene is audited separately.
 # Part of defaultTargets so that a plain `lake build` runs it.
 [[lean_lib]]
 name = "ECRuntimeTest"

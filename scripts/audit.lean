@@ -34,14 +34,39 @@ def facades : List Name :=
    `ECRuntime.WittStandardRuntimeTail,
    `ECRuntime.WittMutationLogThreeRuntime,
    `ECRuntime.WittMutationSharpRuntimeAsymptotics,
-   `ECRuntime.StaticUnaryUnbiasedCorrectedLeftGain]
+   `ECRuntime.StaticUnaryUnbiasedCorrectedLeftGain,
+   `ECRuntime.StaticUnaryUnbiasedEventWeightedRightLoss,
+   `ECRuntime.StaticUnaryUnbiasedPivotDrift,
+   `ECRuntime.StaticUnaryUnbiasedPivotPartition,
+   `ECRuntime.StaticUnaryUnbiasedGlobalDrift,
+   `ECRuntime.StaticUnaryUnbiasedCorrectedRuntime,
+   `ECRuntime.StaticUnaryUnbiasedExplicitRuntime,
+   `ECRuntime.StaticUnaryUnbiasedMomentFamilies,
+   `ECRuntime.StaticUnaryUnbiasedSharpMomentUpper,
+   `ECRuntime.StaticUnaryUnbiasedRadiusTruncation,
+   `ECRuntime.StaticUnaryUnbiasedAcceptedRadiusTail,
+   `ECRuntime.StaticUnaryUnbiasedAcceptedTailLoss,
+   `ECRuntime.StaticUnaryUnbiasedCoordinateTailLoss,
+   `ECRuntime.StaticUnaryUnbiasedTailCoordinateMoment,
+   `ECRuntime.StaticUnaryUnbiasedShortRadiusPivot,
+   `ECRuntime.StaticUnaryUnbiasedShortPivotPairBudget,
+   `ECRuntime.StaticUnaryUnbiasedShortPivotGainRecovery,
+   `ECRuntime.StaticUnaryUnbiasedAcceptedGainAlignment,
+   `ECRuntime.StaticUnaryUnbiasedResidualLossBudget,
+   `ECRuntime.StaticUnaryUnbiasedHighestMaskPivot,
+   `ECRuntime.StaticUnaryUnbiasedLowestMaskBinVal,
+   `ECRuntime.StaticUnaryUnbiasedLowestPivotTailCharge,
+   `ECRuntime.StaticUnaryUnbiasedFirstZeroResidence,
+   `ECRuntime.StaticUnaryUnbiasedFirstZeroOccupationRenewal,
+   `ECRuntime.StaticUnaryUnbiasedFirstZeroWeightedVisits,
+   `ECRuntime.StaticUnaryUnbiasedFirstZeroPathVisits,
+   `ECRuntime.StaticUnaryUnbiasedFirstZeroFiniteRuntime,
+   `ECRuntime.StaticUnaryUnbiasedFirstZeroUnrestrictedRuntime]
 
-/-- Modules unreachable from any facade when the audit was introduced. DEVELOPMENT.md
-section 6 forbids retaining modules that no longer contribute to the proof graph;
-these are grandfathered pending a decision to discharge
-`HasUniformExactLevelExitBounds` for a concrete algorithm or delete the layer. A
-module not on this list that becomes unreachable is an error, so the set may shrink
-but never grow. -/
+/-- Legacy modules outside the principal facade import graph.
+They remain for historical proof dependencies or possible reuse, but the
+allowlist must not expand silently. A newly unreachable module is an error;
+the list may shrink if a legacy module is removed or connected to the API. -/
 def orphanAllowlist : List Name :=
   [`ECRuntime.DirectGeometricStochasticDominationClosed,
    `ECRuntime.DirectGeometricTailDomination,
@@ -138,9 +163,10 @@ def run (candidate : Bool) (debug : Bool := false) : CoreM UInt32 := do
   -- non-standard axiom directly, or names a tainted declaration of ours -- which is
   -- O(edges) in one pass and still catches a `sorry` laundered through a helper.
   --
-  -- This assumes Mathlib itself introduces no non-standard axiom, so taint can only
-  -- originate here. `ECRuntimeTest/AxiomAudit.lean` checks the facade theorems
-  -- against the unrestricted walk, which is what makes that assumption testable.
+  -- This efficient taint check assumes the imported Mathlib environment does
+  -- not itself introduce non-standard axioms; it audits *this project* rather
+  -- than independently re-auditing every imported dependency. There are no
+  -- separate frozen per-theorem axiom snapshots in the public repository.
   let ownNames : NameSet := own.foldl (fun s (n, _) => s.insert n) {}
   let mut directBad : NameMap (Array Name) := {}
   let mut ownDeps : NameMap (Array Name) := {}
@@ -204,8 +230,7 @@ def run (candidate : Bool) (debug : Bool := false) : CoreM UInt32 := do
   -- module can be essential to the build while no facade's proof term names it --
   -- `WittStandardRuntimeAsymptotics` reaches `WittStandardRuntime` only through
   -- `ExpectedRuntimeCorollaries`, so a proof-dependency walk calls it dead when it
-  -- plainly is not. `scripts/dep_graph.py` keeps the proof-dependency view, where
-  -- that finer notion is the informative one.
+  -- plainly is not.
   let mut moduleDeps : NameMap (Array Name) := {}
   for i in [0 : env.header.moduleNames.size] do
     let m := env.header.moduleNames[i]!
@@ -236,7 +261,7 @@ def run (candidate : Bool) (debug : Bool := false) : CoreM UInt32 := do
         warnings := warnings.push s!"{m}: grandfathered orphan, pending removal decision"
       else
         errors := errors.push
-          s!"{m} is unreachable from every facade; see DEVELOPMENT.md section 6"
+          s!"{m} is unreachable from every facade; inspect the public facade import graph"
 
   for w in warnings do IO.println s!"warning: {w}"
   for e in errors do IO.println s!"error: {e}"
