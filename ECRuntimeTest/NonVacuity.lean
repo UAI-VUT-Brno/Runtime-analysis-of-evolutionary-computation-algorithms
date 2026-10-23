@@ -1,3 +1,4 @@
+import ECRuntime.RLSUniformInitialCouponSurvivalInclusionExclusion
 import ECRuntime.LeadingOnesMainResults
 import ECRuntime.WittMutationLogThreeRuntime
 import ECRuntime.StaticUnaryUnbiasedPivotDrift
@@ -819,5 +820,27 @@ example : True := by
     law.linearErrorPotential_drift_ge_singleton_sub_pivotBudgets_sub_tailMeanRadius
       hn w g hw x b hb hg budget hbudget
   trivial
+
+
+/-- A non-vacuous one-bit instance of the exact finite-time coupon-collector
+survival identity, for every nonnegative evaluation budget. This instantiates
+both the positive-weight and positive-dimension hypotheses concretely. -/
+private theorem stage166_oneBit_exactCouponSurvival (t : Nat) :
+    (Finset.univ.sum (fun x : BitString 1 =>
+      finiteLevelSurvival
+        ((StaticUnaryUnbiasedMutation.uniformOneBitLaw
+          (by norm_num : 0 < (1 : Nat))).transition
+          (linearFitness (fun _ : Fin 1 => (1 : Real))))
+        ({allOnes 1} : Set (BitString 1))ᶜ t x)) / (2 : Real) ^ (1 : Nat) =
+      (Finset.Icc (1 : Nat) 1).sum (fun j =>
+        (-1 : Real) ^ (j + 1) * (Nat.choose 1 j : Real) /
+          (2 : Real) ^ j *
+          (1 - (j : Real) / ((1 : Nat) : Real)) ^ t) := by
+  have hw : PositiveLinearWeights (fun _ : Fin 1 => (1 : Real)) := by
+    intro i
+    norm_num
+  exact proposed_rlsLinear_uniformInitial_couponSurvival_inclusionExclusion
+    (by norm_num : 0 < (1 : Nat))
+    (fun _ : Fin 1 => (1 : Real)) hw t
 
 end ECRuntimeTest
