@@ -7,10 +7,19 @@ LeadingOnes, or a linear function? The evolutionary-computation literature answe
 with delicate probabilistic arguments. ECRuntime rebuilds those arguments from first
 principles and has a proof assistant check every step.
 
-**158 modules · 41,980 lines · 1,398 theorems · Lean 4.32.1 / Mathlib v4.32.1**
+**547 public Lean modules · Lean 4.32.1 / Mathlib v4.32.1**
 
-No `sorry`, no added axioms, no `native_decide`, no `set_option` — enforced by an axiom
-audit that fails the build if any of them ever slips in.
+This merge adds 389 certified mathematical modules to the original 158 and
+retains all existing mathematical source files unchanged. The resulting root
+import graph is that of the consolidated, previously verified repository.
+The original main-branch development instructions and build configuration
+remain unchanged. The only verification-script update is `scripts/audit.lean`,
+which explicitly recognizes the new public result families.
+
+The added public modules were independently certified without admitted proofs or
+nonstandard axioms in the source checkpoint. Main's statement-pin and other
+verification scripts remain unchanged; the reachability portion of the source
+hygiene audit has been extended to the merged proof graph.
 
 ## Quick start
 
@@ -52,42 +61,81 @@ and multiplicative drift, fitness levels, stochastic domination, geometric waiti
 and first-hitting-time theory — stated for general stochastic processes rather than for a
 single algorithm.
 
-Current promoted checkpoint: **Stage 79 fix 1**. No active Stage-80 candidate.
+**Merged mathematical checkpoint:** 547 public Lean modules. The source repository
+completed its verification gates before this merge; the combined main-branch
+checkout still requires its own `lake build` and complete verification run.
+
+## Additional verified results
+
+- **Adaptive LeadingOnes:** exact uniform-initial trajectory-level runtime for
+  interior level-dependent rates; optimal positive-level mutation rates,
+  equality/uniqueness statements, and an unattained level-zero boundary infimum.
+- **RLS and coupon collection:** sharp random-initialization corrections,
+  arbitrary-target survival and hitting-time correspondences, and finite/infinite
+  weighted moment transfers.
+- **OneMax and unary unbiased mutation:** fixed-target and fixed-budget bounds,
+  mean-radius identities, harmonic runtime formulas, and drift-cap results under
+  their stated assumptions.
+- **Linear functions:** additional standard-bit-mutation and static unary
+  unbiased analysis, while the unrestricted headline bounds of the 2024
+  Doerr–Janett–Lengler paper remain **unverified**.
+
+The paper-by-paper verified and missing headline theorems, including approximate
+coverage percentages, are in [`docs/VERIFIED_PAPERS.md`](docs/VERIFIED_PAPERS.md).
 
 ## How the claims are kept honest
 
-A green build is not a true theorem. `lake build` therefore also runs `ECRuntimeTest/`:
+Compilation is necessary but does not by itself establish absence of added axioms,
+non-vacuity, or faithful paper-level coverage. The existing main-branch test
+infrastructure is retained, and the three additional regression witnesses
+imported by the certified source test root are included:
 
 | Check | What it catches |
 |---|---|
-| **Axiom audit** | Every facade theorem must depend on exactly `propext`, `Classical.choice`, `Quot.sound` — a `sorry` laundered through a helper lemma still fails. |
-| **Statement pins** | The elaborated type of each promoted theorem is frozen, so a statement cannot be quietly weakened to make a proof close. |
-| **Non-vacuity witnesses** | Concrete witnesses discharge every hypothesis, so no theorem can be vacuously true. |
+| **Axiom / source-hygiene audit** | The updated main audit checks 6 historical and 147 new explicit public facade roots, transitive admitted/nonstandard-axiom dependencies, documentation, and unused signature binders. |
+| **Statement pins** | The original main-branch theorem statements remain guarded; new declarations were checked in the source checkpoint and are not yet added to main's pin system. |
+| **Non-vacuity witnesses** | Original witnesses and three verified new witness modules are imported; this is not a universal automatic non-vacuity proof. |
 
-The full promotion gate — root aggregator, hygiene, cache, focused build, complete root
-build, zero-diagnostics scan, test suite, export — runs via:
+The existing main-branch promotion command remains:
 
 ```
 pwsh -File scripts/verify.ps1 -Stage <N> -Focus ECRuntime.<Module>
 ```
 
-Warnings count as failures.
+Warnings count as failures in the promotion workflow. The updated
+`scripts/audit.lean` tests import reachability from an explicit, maintained set
+of 153 public facades, rather than treating the umbrella root as a facade.
+The pre-existing `LevelChargeExactResidence` grandfathered-orphan warning is
+retained; any newly disconnected module remains an error. Run the audit with:
+
+```bash
+lake env lean --run scripts/audit.lean strict
+```
+
+Also run `lake build ECRuntime ECRuntimeTest` and the main-branch verification
+workflow on the pinned toolchain. The combined checkout has not been independently
+Lean-compiled in the merge-preparation environment; successful static source
+checks do not substitute for the full compiler and promotion gates.
 
 ## What this does *not* claim
 
 The project separates a *certified paper-level result* from a *certified supporting chain*
 and from *reusable infrastructure*, and records which is which for every entry. Several
 headline theorems from the literature are deliberately not claimed, and the hypotheses in
-force are stated explicitly. The list is in
+force are stated explicitly. The **current** paper-level assessment is
+[`docs/VERIFIED_PAPERS.md`](docs/VERIFIED_PAPERS.md). The original
 [`docs/FORMALIZED_RESULTS_AND_LITERATURE_FRONTIER.md`](docs/FORMALIZED_RESULTS_AND_LITERATURE_FRONTIER.md)
-§3.15.
+is preserved as a historical main-branch checkpoint and is not the current
+coverage inventory.
 
 ## Documentation
 
 | File | What it holds |
 |---|---|
 | [`DEVELOPMENT.md`](DEVELOPMENT.md) | Invariant workflow rules: promotion criterion, proof architecture, verification runners, export discipline. |
-| [`HISTORY.md`](HISTORY.md) | Chronological stage and fix milestones. |
-| [`docs/FORMALIZED_RESULTS_AND_LITERATURE_FRONTIER.md`](docs/FORMALIZED_RESULTS_AND_LITERATURE_FRONTIER.md) | Full catalogue of what is proved, with provenance, status vocabulary, and the next-paper frontier. |
-| [`docs/LITERATURE_ROADMAP.md`](docs/LITERATURE_ROADMAP.md) | Literature mapping, proof order, and the near-term plan. |
-| [`docs/PROJECT_STATE.tex`](docs/PROJECT_STATE.tex) | Current mathematical state and promoted boundary, with display equations. |
+| [`HISTORY.md`](HISTORY.md) | Main-branch history with the new consolidated mathematical checkpoint at the top. |
+| [`docs/VERIFIED_PAPERS.md`](docs/VERIFIED_PAPERS.md) | Current per-paper percentages, certified declarations, and missing headline results. |
+| [`docs/P02_THEOREM_TO_PAPER_AUDIT.md`](docs/P02_THEOREM_TO_PAPER_AUDIT.md) | Separate correspondence audit for the 2013 and 2016 Doerr–Doerr papers. |
+| [`docs/FORMALIZED_RESULTS_AND_LITERATURE_FRONTIER.md`](docs/FORMALIZED_RESULTS_AND_LITERATURE_FRONTIER.md) | Historical main-branch catalogue (prior to the 547-module merge). |
+| [`docs/LITERATURE_ROADMAP.md`](docs/LITERATURE_ROADMAP.md) | Historical literature roadmap (not the new coverage audit). |
+| [`docs/PROJECT_STATE.tex`](docs/PROJECT_STATE.tex) | Historical mathematical state before this merge. |

@@ -1,5 +1,31 @@
 # ECRuntime milestone history
 
+## Current merged mathematical checkpoint (25 October 2026)
+
+The main branch's original 158 public modules are preserved byte-for-byte and
+389 independently certified public modules are added, producing a 547-module
+Lean root library. The root aggregator imports the complete consolidated proof
+graph; the development instructions, `.claude` configuration, `lakefile.toml`
+and unrelated main-branch files remain unchanged. The sole script adjustment is
+`scripts/audit.lean`, whose explicit public-facade list now covers the merged
+formalization.
+
+The principal additions include exact adaptive LeadingOnes runtime and policy
+optimality, sharp RLS/coupon random-initialization results, fixed-target/fixed-budget
+runtime theory, and conditional static-unary/OneMax bounds. A historically false
+unrestricted mutation-rate claim was replaced in the new Lean library by a
+certified theorem assuming `0 ≤ p ≤ 1`. The source checkpoint closed its active
+approved research queue; full source-paper formalization is not asserted.
+
+See [the verified-paper audit](docs/VERIFIED_PAPERS.md) for coverage percentages,
+certified Lean declarations, and the important missing theorems. The original
+stage history below is retained as a record of earlier development; its old
+"current" milestones do not supersede this checkpoint. The main branch's
+historical verification scripts are deliberately preserved except for the
+minimal reachability-list update in `scripts/audit.lean`.
+
+## Earlier main-branch development history
+
 Compact mathematical milestones only. Detailed compiler-fix chronology is retained in the
 per-stage verification reviews written to `.verify/stage-<N>/review.txt` by
 `scripts/verify.ps1`, and in archived verification bundles.

@@ -29,106 +29,177 @@ namespace ECRuntimeAudit
 from the root aggregator: `ECRuntime.lean` imports almost everything directly, so a
 root-reachability check passes by construction and can never find dead code. -/
 def facades : List Name :=
-  [`ECRuntime.RLSUniformInitialCouponSurvivalInclusionExclusion,
-   `ECRuntime.RLSUniformInitialCouponSurvivalCapped,
-   `ECRuntime.RLSUniformInitialRuntimeLogTwoFiniteError,
-   `ECRuntime.BinomialHarmonicLogTwoFiniteError,
-   `ECRuntime.BinomialHarmonicAverageIncrementBound,
-   `ECRuntime.BinomialHarmonicAverageStrictIncrease,
-  `ECRuntime.RLSUniformInitialHarmonicSecondOrder,
-  `ECRuntime.RLSUniformInitialRuntimeSecondOrder,
-  `ECRuntime.LogTwoHarmonicCorrectionFiniteSandwich,
-  `ECRuntime.HarmonicHalfSeriesLogTwoLimit,
-  `ECRuntime.BinomialHarmonicScaledRuntimeOneStep,
-  `ECRuntime.BinomialHarmonicAverageOneStep,
-   `ECRuntime.LeadingOnesOptimalRate,
-   `ECRuntime.RLSUniformFirstOrderRuntimeLaw,
-   `ECRuntime.LeadingOnesUniqueStationaryRoot,
-   `ECRuntime.LeadingOnesStationaryRootExists,
-   `ECRuntime.LeadingOnesStationaryAntitone,
-   `ECRuntime.RLSUniformInitialFirstOrderFiniteSandwich,
-   `ECRuntime.RLSUniformInitialNLogNAdditiveEnvelope,
-   `ECRuntime.RLSUniformInitialFirstOrderAsymptotic,
-   `ECRuntime.RLSUniformInitialLogRuntimeEnvelope,
-   `ECRuntime.RLSUniformInitialLogRuntimeLower,
-   `ECRuntime.HarmonicLogLower,
-   `ECRuntime.RLSUniformInitialRuntimeFiniteCorrection,
-    `ECRuntime.RLSUniformInitialCorrectionCauchy,
-    `ECRuntime.RLSUniformInitialRefinedRuntimeEnvelope,
-    `ECRuntime.BinomialHarmonicAverageClosedForm,
-    `ECRuntime.RLSUniformInitialCorrectionEnvelope,
-    `ECRuntime.RLSUniformInitialExpectedRuntimeEnvelope,
-    `ECRuntime.RLSUniformInitialCorrectionTail,
-    `ECRuntime.RLSUniformInitialFixedBudgetMean,
-    `ECRuntime.RLSUniformInitialCouponTail,
-    `ECRuntime.UniformStartZeroCountMean,
-    `ECRuntime.RLSFixedTarget,
-    `ECRuntime.RLSUniformInitialExact,
-    `ECRuntime.BellmanFiniteExactRuntime,
-    `ECRuntime.FiniteRuntimeSurvivalVanishes,
-    `ECRuntime.FiniteRuntimeSurvivalSupport,
-    `ECRuntime.StrictMonotoneRLSCouponTail,
-    `ECRuntime.StrictMonotoneRLS,
-    `ECRuntime.StrictMonotoneRLSKernelSupport,
-    `ECRuntime.RLSLinearExact,
-    `ECRuntime.BellmanGeometricExactRuntime,
-    `ECRuntime.RLSPositiveLinearCouponTail,
-   `ECRuntime.OneMaxRLSHarmonicStep,
-   `ECRuntime.RLSFiniteSurvivalCouponBound,
-   `ECRuntime.RLSFixedBudget,
-   `ECRuntime.RLSExactLevelExitMass,
-   `ECRuntime.RLSZeroCountOneStep,
-   `ECRuntime.HarmonicPredecessor,
-   `ECRuntime.OneMaxUnaryHarmonic,
-   `ECRuntime.OneMaxUnaryStochasticDomination,
-   `ECRuntime.RLSRandomStart,
-   `ECRuntime.FirstZeroHazard,
-   `ECRuntime.FullSupportUniversal,
-   `ECRuntime.UniformFixedTarget,
-   `ECRuntime.ConstantExitRuntime,
-   `ECRuntime.UniformMutationExact,
-   `ECRuntime.JumpEscapeOptimalRate,
-   `ECRuntime.UniformFixedTargetGeometricTail,
-   `ECRuntime.JumpPlateauEscape,
-   `ECRuntime.UnaryOneMaxZeroContraction,
-   `ECRuntime.LeadingOnesMainResults,
+  [`ECRuntime.LeadingOnesMainResults,
    `ECRuntime.WittStandardRuntimeAsymptotics,
    `ECRuntime.WittStandardRuntimeTail,
    `ECRuntime.WittMutationLogThreeRuntime,
    `ECRuntime.WittMutationSharpRuntimeAsymptotics,
-   `ECRuntime.StaticUnaryUnbiasedCorrectedLeftGain,
-   `ECRuntime.StaticUnaryUnbiasedEventWeightedRightLoss,
-   `ECRuntime.StaticUnaryUnbiasedPivotDrift,
-   `ECRuntime.StaticUnaryUnbiasedPivotPartition,
-   `ECRuntime.StaticUnaryUnbiasedGlobalDrift,
-   `ECRuntime.StaticUnaryUnbiasedCorrectedRuntime,
-   `ECRuntime.StaticUnaryUnbiasedExplicitRuntime,
-   `ECRuntime.StaticUnaryUnbiasedMomentFamilies,
-   `ECRuntime.StaticUnaryUnbiasedSharpMomentUpper,
-   `ECRuntime.StaticUnaryUnbiasedRadiusTruncation,
-   `ECRuntime.StaticUnaryUnbiasedAcceptedRadiusTail,
-   `ECRuntime.StaticUnaryUnbiasedAcceptedTailLoss,
-   `ECRuntime.StaticUnaryUnbiasedCoordinateTailLoss,
-   `ECRuntime.StaticUnaryUnbiasedTailCoordinateMoment,
-   `ECRuntime.StaticUnaryUnbiasedShortRadiusPivot,
-   `ECRuntime.StaticUnaryUnbiasedShortPivotPairBudget,
-   `ECRuntime.StaticUnaryUnbiasedShortPivotGainRecovery,
-   `ECRuntime.StaticUnaryUnbiasedAcceptedGainAlignment,
-   `ECRuntime.StaticUnaryUnbiasedResidualLossBudget,
-   `ECRuntime.StaticUnaryUnbiasedHighestMaskPivot,
-   `ECRuntime.StaticUnaryUnbiasedLowestMaskBinVal,
-   `ECRuntime.StaticUnaryUnbiasedLowestPivotTailCharge,
-   `ECRuntime.StaticUnaryUnbiasedFirstZeroResidence,
-   `ECRuntime.StaticUnaryUnbiasedFirstZeroOccupationRenewal,
-   `ECRuntime.StaticUnaryUnbiasedFirstZeroWeightedVisits,
-   `ECRuntime.StaticUnaryUnbiasedFirstZeroPathVisits,
-   `ECRuntime.StaticUnaryUnbiasedFirstZeroFiniteRuntime,
-   `ECRuntime.StaticUnaryUnbiasedFirstZeroUnrestrictedRuntime]
+   `ECRuntime.StaticUnaryUnbiasedCorrectedLeftGain]
 
-/-- Legacy modules outside the principal facade import graph.
-They remain for historical proof dependencies or possible reuse, but the
-allowlist must not expand silently. A newly unreachable module is an error;
-the list may shrink if a legacy module is removed or connected to the API. -/
+/-- Public-facing terminal result modules added by the 547-module certified merge.
+
+The six historical facades do not import all of the new theorem families. These
+additional explicit roots cover their import dependencies without declaring the
+umbrella `ECRuntime.lean` to be a facade: using that umbrella would make every
+root import reachable by construction and silently disable the orphan check.
+
+Keep this list deliberate. A future standalone public result needs an explicit
+entry here, or a dependency path from an existing facade. -/
+def mergedPublicFacades : List Name :=
+  [ `ECRuntime.AbsorbingOccupationPrefixMonotonicity,
+    `ECRuntime.AdaptiveLeadingOnesBoundaryFlipConjugacy,
+    `ECRuntime.AdaptiveLeadingOnesConstantScheduleRuntime,
+    `ECRuntime.AdaptiveLeadingOnesExactSkipTrajectoryParity,
+    `ECRuntime.AdaptiveLeadingOnesExactUniformRuntime,
+    `ECRuntime.AdaptiveLeadingOnesExitExponentialEnvelope,
+    `ECRuntime.AdaptiveLeadingOnesFiniteRenewalSolution,
+    `ECRuntime.AdaptiveLeadingOnesFirstVisitFiniteMarginalBridge,
+    `ECRuntime.AdaptiveLeadingOnesHalfResidenceOptimality,
+    `ECRuntime.AdaptiveLeadingOnesInteriorFiniteGapBound,
+    `ECRuntime.AdaptiveLeadingOnesKernelScheduleExt,
+    `ECRuntime.AdaptiveLeadingOnesMonotoneSupport,
+    `ECRuntime.AdaptiveLeadingOnesOneLevelPolicyImprovement,
+    `ECRuntime.AdaptiveLeadingOnesOptimalAggregateResidenceCost,
+    `ECRuntime.AdaptiveLeadingOnesOptimalLevelSurvivalDominance,
+    `ECRuntime.AdaptiveLeadingOnesOptimalResidenceClosedForm,
+    `ECRuntime.AdaptiveLeadingOnesOptimalScheduleStochastic,
+    `ECRuntime.AdaptiveLeadingOnesOptimalSurvivalClosedForm,
+    `ECRuntime.AdaptiveLeadingOnesPositiveLevelExit,
+    `ECRuntime.AdaptiveLeadingOnesRateInvariantVisitMass,
+    `ECRuntime.AdaptiveLeadingOnesRenewalConvolution,
+    `ECRuntime.AdaptiveLeadingOnesRenewalNonnegative,
+    `ECRuntime.AdaptiveLeadingOnesRuntimeScheduleExt,
+    `ECRuntime.AdaptiveLeadingOnesSurvivalScheduleLocal,
+    `ECRuntime.AdaptiveLeadingOnesUniformBoundaryProgress,
+    `ECRuntime.AdaptiveLeadingOnesUniformRuntimeExitInvariance,
+    `ECRuntime.AdaptiveLeadingOnesUniformSkipProbability,
+    `ECRuntime.AdaptiveLeadingOnesUniformVisitRateInvariance,
+    `ECRuntime.AdaptiveWeightedCountableLevelOccupation,
+    `ECRuntime.AdaptiveWeightedNonoptimalOccupation,
+    `ECRuntime.BellmanFiniteExactRuntime,
+    `ECRuntime.BinomialHarmonicAverageIncrementBound,
+    `ECRuntime.BinomialHarmonicLogTwoFiniteError,
+    `ECRuntime.BinomialHarmonicScaledRuntimeOneStep,
+    `ECRuntime.CouponAllFinitePolynomialSurvival,
+    `ECRuntime.CouponArbitraryMomentDecrementTransfer,
+    `ECRuntime.CouponArbitraryPositiveMomentFiniteMass,
+    `ECRuntime.CouponArbitraryPowerMomentSurvivalTransfer,
+    `ECRuntime.CouponDiscountedHittingCDFTransfer,
+    `ECRuntime.CouponDiscountedSurvivalDecrementTransfer,
+    `ECRuntime.CouponDiscountedSurvivalTransfer,
+    `ECRuntime.CouponFiniteMassTruncatedSecondMoment,
+    `ECRuntime.CouponFiniteMassTruncatedThirdMoment,
+    `ECRuntime.CouponInfiniteWeightedHittingCDF,
+    `ECRuntime.CouponInfiniteWeightedSurvival,
+    `ECRuntime.CouponPowerWeightedHittingCDFTransfer,
+    `ECRuntime.CouponTruncatedSurvivalSecondCentralFunctional,
+    `ECRuntime.CouponWeightedHitQuadraticTransfer,
+    `ECRuntime.DiscreteFirstVisitUnique,
+    `ECRuntime.EAWeightedGenericRuntimeNoFlipLower,
+    `ECRuntime.ENNRealRenewalConvolutionUnroll,
+    `ECRuntime.FiniteRuntimeSurvivalVanishes,
+    `ECRuntime.FirstZeroHazard,
+    `ECRuntime.FullSupportUniversal,
+    `ECRuntime.GenericEAGeometricTargetSurvival,
+    `ECRuntime.GenericWeightedFiniteSurvivalLowerBound,
+    `ECRuntime.GenericWeightedInitialRuntimeLower,
+    `ECRuntime.HarmonicHalfSeriesLogTwoLimit,
+    `ECRuntime.HarmonicPredecessor,
+    `ECRuntime.JumpEscapeOptimalRate,
+    `ECRuntime.JumpPlateauEscape,
+    `ECRuntime.LeadingOnesBoundaryInfimumBridge,
+    `ECRuntime.LeadingOnesBoundaryRuntimeInfimum,
+    `ECRuntime.LeadingOnesCrossBaseGlobalDominance,
+    `ECRuntime.LeadingOnesFirstVisitBelowEquivalence,
+    `ECRuntime.LeadingOnesFixedTargetConvexity,
+    `ECRuntime.LeadingOnesFixedTargetCurvaturePositive,
+    `ECRuntime.LeadingOnesFixedTargetCurvatureRatio,
+    `ECRuntime.LeadingOnesFixedTargetDimensionInvariance,
+    `ECRuntime.LeadingOnesFixedTargetFirstLevelLowerBound,
+    `ECRuntime.LeadingOnesFixedTargetLinearLowerBound,
+    `ECRuntime.LeadingOnesFixedTargetMarginalRatio,
+    `ECRuntime.LeadingOnesFixedTargetStrictConvexity,
+    `ECRuntime.LeadingOnesFixedTargetStrictIncrement,
+    `ECRuntime.LeadingOnesLevelOneUniqueMaximizer,
+    `ECRuntime.LeadingOnesOptimalRate,
+    `ECRuntime.LeadingOnesReferenceBoundaryShiftTendsto,
+    `ECRuntime.LeadingOnesReferencePositiveRateIndependentBase,
+    `ECRuntime.LeadingOnesReferenceZeroExitStrict,
+    `ECRuntime.LeadingOnesStrictLevelExitOptimality,
+    `ECRuntime.LeadingOnesStrictPositivePolicyOptimality,
+    `ECRuntime.LeadingOnesUniqueOptimalPolicyConditional,
+    `ECRuntime.LeadingOnesUniqueStationaryRoot,
+    `ECRuntime.MonotonePathFirstVisitResidenceInterval,
+    `ECRuntime.OneMaxClippedPotentialMaskLipschitz,
+    `ECRuntime.OneMaxEAGeometricTargetSurvival,
+    `ECRuntime.OneMaxEAIndependentBitMeanRadiusRuntimeLower,
+    `ECRuntime.OneMaxEAThresholdAdmissibleCorrection,
+    `ECRuntime.OneMaxEAThresholdRuntimeLower,
+    `ECRuntime.OneMaxEAWeightedFiniteHorizonTarget,
+    `ECRuntime.OneMaxEAWeightedTargetRuntime,
+    `ECRuntime.OneMaxEAZeroDriftRuntimeLower,
+    `ECRuntime.OneMaxUnaryStochasticDomination,
+    `ECRuntime.RLS2016LeadingOnesInitialization,
+    `ECRuntime.RLSAllDimensionEventualNegativeCorrection,
+    `ECRuntime.RLSCountableJointThresholdCosts,
+    `ECRuntime.RLSCountableThresholdSurvivalInvariance,
+    `ECRuntime.RLSExactLevelExitMass,
+    `ECRuntime.RLSFixedTargetThresholdDifference,
+    `ECRuntime.RLSFixedTargetUniformThresholdMonotonicity,
+    `ECRuntime.RLSFixedTargetWeightedStartMonotonicity,
+    `ECRuntime.RLSIndexedTargetSurvivalInvariance,
+    `ECRuntime.RLSMonotoneObjectiveInvariance,
+    `ECRuntime.RLSMonotonePointwiseObjectiveInvariance,
+    `ECRuntime.RLSMonotoneUniformFixedTargetBinomial,
+    `ECRuntime.RLSMonotonicityPaperPredicateEquivalence,
+    `ECRuntime.RLSMultiThresholdInfiniteSurvival,
+    `ECRuntime.RLSPaperCouponUniformMean,
+    `ECRuntime.RLSPaperHarmonicStrongComparison,
+    `ECRuntime.RLSUniformFirstOrderRuntimeLaw,
+    `ECRuntime.RLSUniformInfiniteSurvivalFunctional,
+    `ECRuntime.RLSUniformInitialCouponSurvivalCapped,
+    `ECRuntime.RLSUniformInitialFirstOrderAsymptotic,
+    `ECRuntime.RLSUniformInitialFixedBudgetMean,
+    `ECRuntime.RLSUniformInitialHarmonicSecondOrder,
+    `ECRuntime.RLSUniformInitialNLogNAdditiveEnvelope,
+    `ECRuntime.RLSUniformInitialRuntimeLogTwoFiniteError,
+    `ECRuntime.RLSUniformInitialRuntimeSecondOrder,
+    `ECRuntime.RLSWeightedHittingGeneratingPolynomial,
+    `ECRuntime.RLSWeightedHittingMomentInvariance,
+    `ECRuntime.RLSWeightedSurvivalCostProfile,
+    `ECRuntime.RandomInitialStakeOddScaledFiniteCorrectionBound,
+    `ECRuntime.RandomInitialStakeScaledEvenCorrectionBound,
+    `ECRuntime.RandomStakeCouponArbitraryTargetFiniteObjectiveInvariance,
+    `ECRuntime.RandomStakeCouponArbitraryTargetFiniteRuntimeObjectiveInvariance,
+    `ECRuntime.RandomStakeCouponArbitraryTargetObjectiveInvariance,
+    `ECRuntime.RandomStakeCouponFinitePaperCenteredExact,
+    `ECRuntime.RandomStakeCouponSecondMomentSurvivalTransfer,
+    `ECRuntime.RandomStakeCouponSharpPaperCentered,
+    `ECRuntime.RandomStakeCouponStatewiseObservableTransfer,
+    `ECRuntime.RandomStakeCouponThirdMomentSurvivalTransfer,
+    `ECRuntime.StaticUnarySecondFactorialRadiusBound,
+    `ECRuntime.StaticUnarySingletonSupportPositiveMean,
+    `ECRuntime.StaticUnaryUnbiasedFirstZeroUnrestrictedRuntime,
+    `ECRuntime.StaticUnaryUnbiasedSharpMomentUpper,
+    `ECRuntime.StrictMonotoneCouponSurvival,
+    `ECRuntime.StrictMonotoneRLSCouponTail,
+    `ECRuntime.UnaryOneMaxDimensionRuntimeLower,
+    `ECRuntime.UnaryOneMaxHarmonicCapMonotonicity,
+    `ECRuntime.UnaryOneMaxHarmonicLowerScaled,
+    `ECRuntime.UnaryOneMaxLazySingletonNoFasterThanRLS,
+    `ECRuntime.UnaryOneMaxNoOpFreeExactHarmonic,
+    `ECRuntime.UnaryOneMaxSingletonLawRuntimeInvariance,
+    `ECRuntime.UnaryOneMaxSingletonStrictLazyCost,
+    `ECRuntime.UnaryOneMaxSingletonStrictRuntimeComparison,
+    `ECRuntime.UniformFixedTargetGeometricTail,
+    `ECRuntime.WeightedRuntimeTargetMonotonicity ]
+
+/-- Modules unreachable from any facade when the audit was introduced. DEVELOPMENT.md
+section 6 forbids retaining modules that no longer contribute to the proof graph;
+these are grandfathered pending a decision to discharge
+`HasUniformExactLevelExitBounds` for a concrete algorithm or delete the layer. A
+module not on this list that becomes unreachable is an error, so the set may shrink
+but never grow. -/
 def orphanAllowlist : List Name :=
   [`ECRuntime.DirectGeometricStochasticDominationClosed,
    `ECRuntime.DirectGeometricTailDomination,
@@ -160,7 +231,6 @@ def isGenerated (n : Name) : Bool :=
       s == "ibelow" || s == "binductionOn" || s == "rec" || s == "recOn" ||
       s == "casesOn" || s == "injEq" || s == "sizeOf_spec" || s == "noConfusion" ||
       s == "noConfusionType" || s == "mk" || s == "ofNat" || s == "toCtorIdx" ||
-      s == "congr_simp" ||
       s.startsWith "eq_" || s.startsWith "match_" || s.startsWith "proof_" ||
       s.startsWith "_"
   | _ => false
@@ -226,10 +296,9 @@ def run (candidate : Bool) (debug : Bool := false) : CoreM UInt32 := do
   -- non-standard axiom directly, or names a tainted declaration of ours -- which is
   -- O(edges) in one pass and still catches a `sorry` laundered through a helper.
   --
-  -- This efficient taint check assumes the imported Mathlib environment does
-  -- not itself introduce non-standard axioms; it audits *this project* rather
-  -- than independently re-auditing every imported dependency. There are no
-  -- separate frozen per-theorem axiom snapshots in the public repository.
+  -- This assumes Mathlib itself introduces no non-standard axiom, so taint can only
+  -- originate here. `ECRuntimeTest/AxiomAudit.lean` checks the facade theorems
+  -- against the unrestricted walk, which is what makes that assumption testable.
   let ownNames : NameSet := own.foldl (fun s (n, _) => s.insert n) {}
   let mut directBad : NameMap (Array Name) := {}
   let mut ownDeps : NameMap (Array Name) := {}
@@ -293,7 +362,8 @@ def run (candidate : Bool) (debug : Bool := false) : CoreM UInt32 := do
   -- module can be essential to the build while no facade's proof term names it --
   -- `WittStandardRuntimeAsymptotics` reaches `WittStandardRuntime` only through
   -- `ExpectedRuntimeCorollaries`, so a proof-dependency walk calls it dead when it
-  -- plainly is not.
+  -- plainly is not. `scripts/dep_graph.py` keeps the proof-dependency view, where
+  -- that finer notion is the informative one.
   let mut moduleDeps : NameMap (Array Name) := {}
   for i in [0 : env.header.moduleNames.size] do
     let m := env.header.moduleNames[i]!
@@ -304,11 +374,12 @@ def run (candidate : Bool) (debug : Bool := false) : CoreM UInt32 := do
 
   if debug then
     IO.println s!"debug: import graph has {moduleDeps.size} ECRuntime module(s)"
+    IO.println s!"debug: {facades.length} original + {mergedPublicFacades.length} merged public facades"
     for f in facades do
       IO.println s!"debug:   {f} -> {(moduleDeps.find? f |>.getD #[]).size} import(s)"
 
   let mut seen : NameSet := {}
-  let mut stack := facades
+  let mut stack := facades ++ mergedPublicFacades
   while !stack.isEmpty do
     match stack with
     | [] => pure ()
@@ -324,7 +395,7 @@ def run (candidate : Bool) (debug : Bool := false) : CoreM UInt32 := do
         warnings := warnings.push s!"{m}: grandfathered orphan, pending removal decision"
       else
         errors := errors.push
-          s!"{m} is unreachable from every facade; inspect the public facade import graph"
+          s!"{m} is unreachable from every facade; see DEVELOPMENT.md section 6"
 
   for w in warnings do IO.println s!"warning: {w}"
   for e in errors do IO.println s!"error: {e}"

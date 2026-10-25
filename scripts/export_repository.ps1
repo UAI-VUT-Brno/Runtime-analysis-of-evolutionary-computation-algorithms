@@ -35,17 +35,28 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 $repo = Split-Path -Parent $PSScriptRoot
 
 $RootFiles = @(
-    '.gitignore', '.gitattributes', 'README.md',
-    'DEVELOPMENT.md', 'HISTORY.md', 'CLAUDE.md', 'SOUL.md',
-    'ECRuntime.lean', 'ECRuntimeTest.lean', 'run_verification.sh', 'lakefile.toml',
-    'lake-manifest.json', 'lean-toolchain'
+    '.gitignore', 'README.md', 'DEVELOPMENT.md', 'HISTORY.md', 'CLAUDE.md', 'SOUL.md',
+    'ECRuntime.lean', 'ECRuntimeTest.lean', 'lakefile.toml', 'lake-manifest.json',
+    'lean-toolchain'
 )
-$Optional = @('CLAUDE.md', 'SOUL.md', 'lake-manifest.json')
-# Export all maintained directories. The candidate-stage marker is intentionally
-# absent after the Stage 166 promotion; future active candidates are exported
-# only as regular files in candidates/, with their approved signature record.
-$SourceDirs = @('ECRuntime', 'ECRuntimeTest', 'candidates',
-                'docs', 'scripts', '.claude')
+$DocFiles = @(
+    'docs/PROJECT_STATE.tex',
+    'docs/LITERATURE_ROADMAP.md',
+    'docs/FORMALIZED_RESULTS_AND_LITERATURE_FRONTIER.md',
+    'docs/frontier.toml'
+)
+$ScriptFiles = @(
+    'scripts/verify.ps1',
+    'scripts/export_repository.ps1',
+    'scripts/test_hooks.ps1',
+    'scripts/hooks/guard_lean_write.ps1',
+    'scripts/hooks/guard_outbound.ps1',
+    'scripts/dep_extract.lean'
+)
+# Present in a working tree but never required; exported when found.
+$Optional = @('CLAUDE.md', 'SOUL.md', 'lake-manifest.json', 'docs/frontier.toml')
+$LeanDirs = @('ECRuntime', 'ECRuntimeTest')
+$Globs    = @('docs/graphs/*.mmd', 'scripts/*.py')
 
 function Get-RelativePath {
     param([string]$Full)
@@ -55,7 +66,7 @@ function Get-RelativePath {
 # --- collect -----------------------------------------------------------------
 $files = [System.Collections.Generic.List[string]]::new()
 
-foreach ($rel in $RootFiles) {
+foreach ($rel in ($RootFiles + $DocFiles + $ScriptFiles)) {
     $path = Join-Path $repo $rel
     if (Test-Path -LiteralPath $path -PathType Leaf) {
         $files.Add((Resolve-Path -LiteralPath $path).Path)
@@ -65,22 +76,16 @@ foreach ($rel in $RootFiles) {
     }
 }
 
-# Only the stable, maintained runner is exported. Historical per-round
-# wrapper scripts were retired after the verified Round56 consolidation.
+foreach ($dir in $LeanDirs) {
+    $found = Get-ChildItem -LiteralPath (Join-Path $repo $dir) -Filter *.lean -File |
+             Sort-Object Name
+    if (-not $found) { Write-Error "no maintained $dir/*.lean files found"; exit 3 }
+    $found | ForEach-Object { $files.Add($_.FullName) }
+}
 
-foreach ($dir in $SourceDirs) {
-    $path = Join-Path $repo $dir
-    if (-not (Test-Path -LiteralPath $path -PathType Container)) {
-        Write-Error "required maintained source directory is missing: $dir"
-        exit 3
-    }
-    Get-ChildItem -LiteralPath $path -Recurse -File |
-        Where-Object {
-            $_.Name -notmatch '(?i)\.(pyc|log)$' -and
-            $_.Name -ne 'settings.local.json' -and
-            $_.FullName -notmatch '[\\/]__pycache__[\\/]'
-        } | Sort-Object FullName |
-        ForEach-Object { $files.Add($_.FullName) }
+foreach ($glob in $Globs) {
+    Get-ChildItem -Path (Join-Path $repo $glob) -File -ErrorAction SilentlyContinue |
+        Sort-Object FullName | ForEach-Object { $files.Add($_.FullName) }
 }
 
 $files = $files | Sort-Object { Get-RelativePath $_ } -Unique

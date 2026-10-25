@@ -1,169 +1,469 @@
-# Verified source-paper claims: whole-repository catalogue
+# Paper-by-paper verification coverage
 
-**Audit checkpoint:** Stage 130, Round 56 (23 October 2026), with the
-user-run **full eight-gate verification passed** after Stage 166 promotion
-integration. **Lean / Mathlib:** 4.32.1 / v4.32.1. **Certified selected
-stages:** 60 (107–166), plus earlier foundations. **Public modules:** 249;
-**approved-open candidates:** none. No public theorem statement or proof body
-was modified during consolidation.
+**Audited checkpoint:** 25 October 2026; Lean 4.32.1 / Mathlib v4.32.1.
+The independently certified **source checkpoint** contains **547 public Lean
+modules**, 19 retained regression-test source modules, 316 promoted registry
+entries, two retired-invalid entries, and no active research candidates. The
+present **minimal merge onto main** copies all 547 public Lean modules but
+only the three additional regression-test files loaded by that checkpoint's
+default test root (six test modules total including the three main-branch tests).
+It deliberately does **not** import the source registry or retired-claim
+archive, preserving the main branch's development files and governance.
+The compilation certification belongs to the source checkpoint; the combined
+main checkout needs a separate build. This is a *mathematical correspondence
+audit*, not a count of all lemmas or paper pages.
 
-> **Scope and integrity.** This lists *paper-associated claims with verified
-> Lean counterparts*, not a complete mechanization of any publication. Some
-> certified theorems start with `proposed_` for historical reasons; their
-> status is determined by their compiled public proofs, not their names.
-> The Stage 166 source has been promoted, and its original approved header
-> remains SHA-256 protected. Where source-paper numbering is unverified,
-> the exact Lean declaration is given without inventing a theorem number.
+## Meaning of the coverage estimates
 
-## How to interpret percentages
+The percentages below are **approximate coverage of selected headline result
+families of each publication**. They are retained to make progress visible,
+not to assert that a given percentage of the paper's pages, lemmas, or lines of
+proof has been formalized. Each paper is assessed separately against its own
+principal claims. The estimates use the following rule:
 
-1. The denominator is a **manual partition into the paper's main claim families**, informed by the publication's abstract/results and the maintained proof frontier. A family can contain several lemmas. It is not a mechanically extracted count of numbered lemmas and is **not a bibliometric statistic**.
-2. A family counts as covered only where a public Lean theorem expresses it under the corresponding assumptions. **Restricted special cases** count as partial and do not justify claiming the full source theorem. Derivable but unstated consequences are labelled accordingly. A paper may share a claim with another paper; coverage percentages are **not additive** across publications.
-3. Approximate percentages are rounded to five-percent increments; uncertainty is roughly **±10–15 percentage points** for the less directly matched papers. The detailed covered/missing groups below are authoritative over any percentage.
-4. **No source paper is audited as 100% covered.** A full-paper claim would require a version-specific theorem-by-theorem comparison, including all assumptions, upper and lower bounds, parameter regimes, variants and substantial corollaries.
-5. Runtimes in this repository generally count **mutation iterations** rather than an initial fitness evaluation; `runtimeSup` and finite-survival quantities are not automatically identical to other published cost conventions. The positive-linear RLS setting is narrower than the class of **all strictly monotone** pseudo-Boolean functions. The finite-state versions of generic drift theorems are narrower than unrestricted stochastic-process statements.
+- **Verified:** an imported, compiled Lean theorem with a matching conclusion
+  and relevant assumptions, or a directly stated stronger theorem implying the
+  published claim under explicitly documented specializations.
+- **Verified special case / partial:** a published result is matched only for a
+  restricted algorithm, initial distribution, operator, dimension, parameter
+  range, or conclusion. This receives partial rather than complete credit.
+- **Not verified:** no public Lean theorem currently establishes the full
+  source claim under its published hypotheses. Having a proof of a supporting
+  lemma, numerical experiment, or related theorem is not enough.
 
-## Overview (all literature families with an identified certified counterpart)
+We use small, manually selected **claim-family inventories**, rather than a
+mechanical count of every numbered lemma. Thus percentages are deliberately
+rounded (usually to the nearest five percentage points); uncertainty is at
+least **10–15 percentage points** for loosely matched publications. The
+*verified and unverified inventories below are authoritative over the number*.
+Results can overlap between papers and percentages **must not be summed**.
+An exact equality of `runtimeSup`, a real-valued mean, a first-hitting-time
+integral, and a bounded finite-horizon expectation are **not interchangeable
+without a certified bridge**. An iteration count can also differ from a
+fitness-evaluation count by initialization or algorithm conventions.
 
-| ID | Source publication | Main covered family, exact Lean entrypoints | Estimated coverage of selected claim families | Entire paper? |
-|---|---|---|---:|---|
-| P01 | [Böttcher–Doerr–Neumann (2010), *Optimal Fixed and Adaptive Mutation Rates for the LeadingOnes Problem*](https://doi.org/10.1007/978-3-642-15844-5_1) | Exact fixed-rate LeadingOnes expected time, scaled limit, optimal fixed rate | **~50%** | No |
-| P02 | [Doerr–Doerr (2016; preprint 2013), *Collecting Coupons with Random Initial Stake*](https://arxiv.org/abs/1308.6384) | Exact binomial/harmonic RLS mean, finite `log 2` correction, first/second-order limits, tail envelope; a new exact survival-distribution extension | **~65%** | No |
-| P03 | [He–Yao (2001), *Drift Analysis and Average Time Complexity of Evolutionary Algorithms*](https://doi.org/10.1016/S0004-3702(01)00058-3) | Finite-state additive-drift upper certificates | **~20%** | No |
-| P04 | [Doerr–Johannsen–Winzen (2012), *Multiplicative Drift Analysis*](https://arxiv.org/abs/1101.0776) | Finite-state multiplicative drift, harmonic/log runtime certificates | **~30%** | No |
-| P05 | [Lehre–Witt (2014), *General Drift Analysis with Tail Bounds*](https://arxiv.org/abs/1307.2559) | Special-case first-hitting-time tail and additive/multiplicative bounds | **~15%** | No |
-| P06 | [Doerr (2019), *Analyzing Randomized Search Heuristics via Stochastic Domination*](https://doi.org/10.1016/j.tcs.2018.09.024) | Geometric waiting and fitness-level domination, OneMax specialization | **~35%** | No |
-| P07 | [Buzdalov–Doerr–Doerr–Vinokurov (2020 conference / 2022 journal), *Fixed-Target Runtime Analysis*](https://arxiv.org/abs/2004.09613) | Binomial/harmonic lemma, special fixed-target RLS and full-target LeadingOnes cases | **~30%** | No |
-| P08 | [Jansen–Zarges (2014), *Performance Analysis of Randomised Search Heuristics Operating with a Fixed Budget*](https://doi.org/10.1016/j.tcs.2013.06.007) | Exact one-bit RLS/OneMax fixed-budget zero-count expectation | **~20%** | No |
-| P09 | [Doerr–Le–Makhmara–Nguyen (2017), *Fast Genetic Algorithms*](https://arxiv.org/abs/1703.03334) | Jump plateau escape and best fixed escape rate | **~20%** | No |
-| P10 | [Witt (2013), *Tight Bounds on the Optimization Time of a Randomized Search Heuristic on Linear Functions*](https://doi.org/10.1017/S0963548312000600) | Sharp standard-rate expected-time upper, restricted scaled-rate/tail bounds | **~35%** | No |
-| P11 | [Doerr–Janett–Lengler (2024), *Tight Runtime Bounds for Static Unary Unbiased Evolutionary Algorithms on Linear Functions*](https://doi.org/10.1007/s00453-024-01258-9) | Coordinate-flip marginals, moments, restricted potential/drift bounds | **~15% support; 0% of unrestricted headline bounds** | No |
-| P12 | [Droste–Jansen–Wegener (2002), *On the Analysis of the (1+1) Evolutionary Algorithm*](https://doi.org/10.1016/S0304-3975(01)00182-7) | Positive-linear `O(n log n)` implication at standard rate, via a later sharp bound | **~15% (overlapping consequence)** | No |
+## Coverage at a glance
 
-**Notes on literature identity:** P07 includes the GECCO 2020 proceedings work and its expanded version (arXiv v3, 2021; Algorithmica 2022), not two independently counted publications. P04 uses theorem numbering from the accessible arXiv version of *Multiplicative Drift Analysis*; the published version may differ. For P02 the specific source numbering below refers to the accessible 2013 arXiv version. These caveats matter when comparing numbered claims.
+| ID | Publication | Approximate headline-family coverage | Crucial qualification |
+|---|---|---:|---|
+| P01 | [Böttcher, Doerr, Neumann (2010), *Optimal Fixed and Adaptive Mutation Rates for the LeadingOnes Problem*](https://doi.org/10.1007/978-3-642-15844-5_1) | **~85%** | Fixed and genuine adaptive exact means and optimality are certified; the explicit optimized `~0.68 n²` asymptotic statement is not yet located as a theorem |
+| P02 | [Doerr, Doerr (2013), *Collecting Coupons with Random Initial Stake*](https://arxiv.org/abs/1308.6384) | **~95% of headline claims** | Both numbered headline theorems have direct certified counterparts; not every paper-specific auxiliary inequality is audited |
+| P02b | [Doerr, Doerr (2016), *The Impact of Random Initialization on the Runtime of Randomized Search Heuristics*](https://doi.org/10.1007/s00453-015-0019-5) | **~25%** | Primarily the RLS/OneMax subcase; not the broader `(1+1)`-EA or LeadingOnes comparison families |
+| P03 | [He, Yao (2001), *Drift Analysis and Average Time Complexity of Evolutionary Algorithms*](https://doi.org/10.1016/S0004-3702(01)00058-3) | **~20%** | Finite-state additive-drift upper-bound specialization |
+| P04 | [Doerr, Johannsen, Winzen (2012), *Multiplicative Drift Analysis*](https://arxiv.org/abs/1101.0776) | **~30%** | Multiplicative-drift bound and selected linear-function consequences, not all applications and matching lower bounds |
+| P05 | [Lehre, Witt (2014), *General Drift Analysis with Tail Bounds*](https://arxiv.org/abs/1307.2559) | **~15%** | Specialized drift/tail bounds, not the general variable-drift two-sided theorem |
+| P06 | [Doerr (2019), *Analyzing Randomized Search Heuristics via Stochastic Domination*](https://doi.org/10.1016/j.tcs.2018.09.024) | **~35%** | Geometric-waiting and coupling domination, not the universal mutation-based comparison or all applications |
+| P07 | [Buzdalov, Doerr, Doerr, Vinokurov (2020/2022), *Fixed-Target Runtime Analysis*](https://arxiv.org/abs/2004.09613) | **~40%** | Exact harmonic lemma and specified RLS/LeadingOnes subcases; broader fixed-target operator families are open |
+| P08 | [Jansen, Zarges (2014), *Performance Analysis of Randomised Search Heuristics Operating with a Fixed Budget*](https://doi.org/10.1016/j.tcs.2013.06.007) | **~20%** | Exact RLS/OneMax-type fixed-budget expectation only |
+| P09 | [Doerr, Le, Makhmara, Nguyen (2017), *Fast Genetic Algorithms*](https://arxiv.org/abs/1703.03334) | **~20%** | Jump plateau escape and optimal fixed escape rate; no heavy-tailed full-runtime theorem |
+| P10 | [Witt (2013), *Tight Bounds on the Optimization Time of a Randomized Search Heuristic on Linear Functions*](https://doi.org/10.1017/S0963548312000600) | **~35%** | Sharp standard-rate upper and restricted scaled-rate tails, not complete sharp lower/optimality claims |
+| P11 | [Doerr, Janett, Lengler (2024), *Tight Runtime Bounds for Static Unary Unbiased Evolutionary Algorithms on Linear Functions*](https://doi.org/10.1007/s00453-024-01258-9) | **~20% supporting/special cases; 0% of two unrestricted headline bounds** | Moment, coordinate-marginal and conditional upper-bound infrastructure, not the general sharp upper and lower results |
+| P12 | [Droste, Jansen, Wegener (2002), *On the Analysis of the (1+1) Evolutionary Algorithm*](https://doi.org/10.1016/S0304-3975(01)00182-7) | **~15% by overlapping consequence** | Positive-linear `O(n log n)` follows from later certified bounds; most original lower/hardness results are open |
 
-### Coverage numerator/denominator guide
+**Indicative coverage denominators:** P01 approximately **5/6** core result
+families; P02a **2/2** numbered headline theorems (with a small residual
+auxiliary audit); P02b **1/4** algorithm/problem combinations; P03 **1/5**;
+P04 **2/6**; P05 **1/6**; P06 **2/6**; P07 approximately **2.5/6** after
+partial credit for restricted Theorems 4/5; P08 **1/5**; P09 **1/5**;
+P10 **2/6**; P11 roughly **1/6 supporting families but 0/2 unrestricted
+headline bounds**; and P12 **1/6 by consequence**. These are *researcher-defined
+claim groups*, not counts of all numbered lemmas. In particular, a partially
+covered theorem family is not equivalent to a fully proved source theorem.
 
-These are deliberately *small, explicitly chosen* headline-family inventories, not a count of every numbered statement in a source PDF. The approximations in the table above round these ratios (with adjustments for partially matched source theorem hypotheses): **P01 3/6**, **P02 approximately 4/6**, **P03 1/5**, **P04 approximately 2/6**, **P05 roughly 1/6**, **P06 roughly 2/6**, **P07 approximately 2/6**, **P08 1/5**, **P09 1/5**, **P10 approximately 2/6**, **P11 about 1/6 supporting groups but 0/2 main claims**, and **P12 approximately 1/6 by consequence**. The corresponding verified and unverified groups are itemized in each section below. In particular, an implication of a theorem is not counted again as a newly formalized source proof.
+**Interpretation:** P02a and P02b are *different publications*. P07's
+conference and expanded journal versions form one literature family here;
+version-specific theorem numbering is only used when already checked against
+the indicated source. No row claims a completely certified *whole paper*.
 
-## Detailed claim-to-theorem correspondences
+## Detailed correspondence audit
 
-### P01 — Böttcher, Doerr and Neumann (2010): LeadingOnes
+### P01 — Böttcher, Doerr and Neumann: LeadingOnes fixed and adaptive rates (~85%)
 
-**Verified (three of six selected claim groups):**
+**Verified headline results**
 
-- **Exact mean for any fixed independent bit-mutation probability `0 < p < 1`.** `leadingOnesUniformFirstHittingTimeExpectation_eq_formula` in [`LeadingOnesOccupationTotalClosure.lean`](../ECRuntime/LeadingOnesOccupationTotalClosure.lean), supported by [`LeadingOnesMainResults.lean`](../ECRuntime/LeadingOnesMainResults.lean). Closed form: `leadingOnesUniformFirstHittingTimeExpectation_canonicalStandardMutationRate_eq_closedForm` in [`LeadingOnesStandardRateClosedForm.lean`](../ECRuntime/LeadingOnesStandardRateClosedForm.lean). Corresponds to the paper's exact fixed-`p` result (the formula proportional to `((1-p)^(-n+1)-(1-p))/(2p²)`).
-- **Fixed scaled mutation probability `p=c/n` and asymptotic leading coefficient.** `leadingOnes_scaled_fixedRate_limit` in [`LeadingOnesOptimalRate.lean`](../ECRuntime/LeadingOnesOptimalRate.lean); `leadingOnesUniformFirstHittingTimeExpectation_scaledMutationRate_eq_formula` in [`LeadingOnesScaledRate.lean`](../ECRuntime/LeadingOnesScaledRate.lean). The coefficient is `F(c)=(exp(c)-1)/(2c²)`.
-- **Optimal asymptotic *fixed* rate.** `leadingOnes_fixedRate_unique_optimum` (same module), with `proposed_leadingOnes_stationaryRoot_exists` in [`LeadingOnesStationaryRootExists.lean`](../ECRuntime/LeadingOnesStationaryRootExists.lean) and `proposed_leadingOnes_uniqueStationaryRoot_Ioo` in [`LeadingOnesUniqueStationaryRoot.lean`](../ECRuntime/LeadingOnesUniqueStationaryRoot.lean). The optimizer lies in `(1,2)` and satisfies `(2-c) exp(c)=2`; **not** an optimizer over fitness-dependent policies.
+1. **Exact uniform-initial expected optimization time at a fixed rate
+   `0 < p < 1`.**
+   [`leadingOnesUniformFirstHittingTimeExpectation_eq_formula`](../ECRuntime/LeadingOnesOccupationTotalClosure.lean)
+   identifies the genuine first-hitting-time mean with the fixed-rate formula;
+   [`leadingOnesUniformFirstHittingTimeExpectation_scaledMutationRate_eq_formula`](../ECRuntime/LeadingOnesScaledRate.lean)
+   gives its scaled-rate version.
+2. **Asymptotic fixed-rate leading coefficient and uniquely optimal fixed
+   scale.**
+   [`leadingOnes_scaled_fixedRate_limit`](../ECRuntime/LeadingOnesOptimalRate.lean)
+   proves the coefficient `(exp(c)-1)/(2c²)` for `p=c/n`;
+   [`leadingOnes_fixedRate_unique_optimum`](../ECRuntime/LeadingOnesOptimalRate.lean)
+   identifies the unique optimum by `(2-c)exp(c)=2`, `1<c<2`.
+3. **Exact expected runtime for genuine level-dependent adaptive mutation.**
+   [`proposed_leadingOnesAdaptive_uniformTrajectoryRuntime_eq_halfSum`](../ECRuntime/AdaptiveLeadingOnesTrajectoryRuntimeAssembly.lean)
+   and [`proposed_leadingOnesAdaptive_uniformRuntime_eq_levelSum`](../ECRuntime/AdaptiveLeadingOnesExactUniformRuntime.lean)
+   certify, under the stated interior schedule assumptions,
+   `E[T] = (1/2) Σ_{i=0}^{n-1} (p_i(1-p_i)^i)⁻¹`. The historical `proposed_`
+   prefix does **not** mean the imported theorem remains conjectural.
+4. **Optimal fitness-dependent rate and global schedule comparison.**
+   [`proposed_leadingOnes_positiveLevelExit_uniqueMaximizer`](../ECRuntime/AdaptiveLeadingOnesUniquePositiveLevelOptimizer.lean)
+   identifies `p_i=1/(i+1)` at positive levels;
+   [`proposed_leadingOnes_referenceOptimal_uniformRuntime_equality_iff`](../ECRuntime/LeadingOnesStrictPositivePolicyOptimality.lean)
+   certifies equality rigidity; see also
+   [`proposed_leadingOnesAdaptive_uniformRuntime_antitone_exitMass`](../ECRuntime/AdaptiveLeadingOnesScheduleExitComparison.lean).
+5. **Boundary behavior of the optimum.**
+   [`proposed_leadingOnes_referenceRuntime_boundaryInfimum`](../ECRuntime/LeadingOnesBoundaryRuntimeInfimum.lean)
+   and [`proposed_leadingOnes_referenceExitCost_sum_boundaryTendsto`](../ECRuntime/LeadingOnesReferenceExitCostBoundaryTendsto.lean)
+   give the level-zero boundary infimum and finite reference-cost limit.
 
-**Missing:** exact adaptive level-dependent mean; proof of optimal schedule; optimal adaptive constant (around `0.68 n²`) and its lower-bound/optimality comparison. Paper theorem-number mapping for its PPSN version has **not** been independently established, so the precise Lean declaration names above are the stable identifiers. **Coverage: ~50%.**
+**Not yet verified in the same source-paper form**
 
-### P02 — Benjamin and Carola Doerr (2016): random initial coupon stake
+- An **explicit asymptotic theorem** for the optimized adaptive schedule of
+  the form `E[T_opt]/n² → C_adapt` with the paper's approximately `0.68`
+  constant, followed by its numerical comparison with the best fixed-rate
+  `~0.77 n²` coefficient. The finite-dimensional exact formula and rate
+  optimality are certified, but this combined limit/comparison has not been
+  identified as a separately exported Lean theorem.
+- A version-specific check of **all secondary publication corollaries and
+  boundary/initialization conventions**. The certified results are substantial
+  but not a literal transcription of every result in the proceedings paper.
 
-**Source numbering (2013 preprint):** **Theorem 1** gives `n H_{n/2}-1/2±o(1)` for coupon collection with random initial stake; **Theorem 2** transfers this to RLS on **all strictly monotone functions**. The version-specific odd-`n` definition of `H_{n/2}` matters. The Lean statements listed here do **not** directly certify either complete theorem in that printed form.
+### P02a — Doerr and Doerr (2013): random-initial-stake coupon collector (~95%)
 
-**Verified (four of six selected claim groups, with restrictions):**
+**Verified headline results**
 
-- **Fixed initial zero count.** `rlsLinear_runtimeSup_eq_harmonic` in [`RLSLinearExact.lean`](../ECRuntime/RLSLinearExact.lean): `E[T|Z₀=d]=n H_d` for strictly positive linear objectives.
-- **Uniform random initial stake and binomial averaging.** `proposed_rlsLinear_uniformInitial_runtimeAverage` in [`RLSUniformInitialExact.lean`](../ECRuntime/RLSUniformInitialExact.lean), reduced to an exact finite harmonic identity by `proposed_rlsLinear_uniformInitial_runtimeFiniteCorrection` in [`RLSUniformInitialRuntimeFiniteCorrection.lean`](../ECRuntime/RLSUniformInitialRuntimeFiniteCorrection.lean).
-- **First/second-order `log 2` behavior.** `proposed_rlsLinear_uniformStart_runtime_secondOrder` in [`RLSUniformInitialRuntimeSecondOrder.lean`](../ECRuntime/RLSUniformInitialRuntimeSecondOrder.lean), `proposed_rlsUniformInitial_harmonic_secondOrderCorrection` in [`RLSUniformInitialHarmonicSecondOrder.lean`](../ECRuntime/RLSUniformInitialHarmonicSecondOrder.lean), and `proposed_rlsLinear_uniformInitial_firstOrder_runtime` in [`RLSUniformFirstOrderRuntimeLaw.lean`](../ECRuntime/RLSUniformFirstOrderRuntimeLaw.lean).
-- **Stronger finite approximation and a survival *upper bound*.** `proposed_rlsLinear_uniformInitial_logTwoFiniteRuntimeEnvelope` in [`RLSUniformInitialRuntimeLogTwoFiniteError.lean`](../ECRuntime/RLSUniformInitialRuntimeLogTwoFiniteError.lean) certifies `n(H_n-log 2) ≤ E[T_n] ≤ n(H_n-log 2)+n 2^(-n)`. `proposed_rlsLinear_uniformInitial_couponSurvivalCapped` in [`RLSUniformInitialCouponSurvivalCapped.lean`](../ECRuntime/RLSUniformInitialCouponSurvivalCapped.lean) adds a finite-time bound; it does **not** give the exact distribution.
+1. **Paper Theorem 1: sharp randomly initialized coupon-collector mean.**
+   [`proposed_randomStakeCoupon_allDimensionPaperSharpCentered`](../ECRuntime/RandomStakeCouponSharpPaperCentered.lean)
+   gives the all-dimension centered `-1/2` limit;
+   [`proposed_randomStakeCoupon_finitePaperCenteredExact`](../ECRuntime/RandomStakeCouponFinitePaperCenteredExact.lean)
+   gives the finite centered identity.
+2. **Paper Theorem 2: random-initial RLS on strictly monotone Boolean
+   fitness.**
+   [`proposed_strictMonotoneRLS_allDimensionPaperSharpCentered`](../ECRuntime/RLSAllDimensionPaperSharpCentered.lean)
+   proves the odd/even-compatible `n H_{n/2} - 1/2 + o(1)` expansion,
+   and [`proposed_strictMonotoneRLS_allDimensionPaperCentered_exact`](../ECRuntime/RLSAllDimensionPaperCenteredExact.lean)
+   gives the exact centered finite formula under the Lean monotonicity
+   hypothesis.
+3. **Coupon/RLS process identification, including targets and laws.**
+   [`proposed_couponProcess_statewiseSurvival_eq_strictMonotoneRLS`](../ECRuntime/RandomStakeCouponStatewiseSurvivalCorrespondence.lean),
+   [`proposed_couponProcess_arbitraryTarget_runtimeSup_eq_strictMonotoneRLS`](../ECRuntime/RandomStakeCouponArbitraryTargetRuntime.lean),
+   and [`proposed_couponProcess_arbitraryTarget_survival_eq_strictMonotoneRLS`](../ECRuntime/RandomStakeCouponArbitraryTargetFiniteHorizon.lean)
+   make the comparison direct, not merely an informal consequence.
+4. **Finite harmonic/binomial correction and higher observable transfers.**
+   [`proposed_binomialHarmonicAverage_closedForm`](../ECRuntime/BinomialHarmonicAverageClosedForm.lean)
+   and [`proposed_couponProcess_arbitraryTarget_weightedSurvival_eq_strictMonotoneRLS`](../ECRuntime/RandomStakeCouponWeightedSurvivalTransfer.lean)
+   certify exact identities; additional higher-moment and infinite-weighted
+   transfers appear in
+   [`CouponArbitraryPositiveMomentFiniteMass.lean`](../ECRuntime/CouponArbitraryPositiveMomentFiniteMass.lean)
+   and [`CouponInfiniteWeightedSurvival.lean`](../ECRuntime/CouponInfiniteWeightedSurvival.lean).
 
-**Missing or only partially matched:** (a) the precise parity-adjusted `-1/2+o(1)` result of paper **Theorem 1**; (b) its extension to **every strictly monotone objective** in **Theorem 2**, since the current uniform-start equalities assume *positive linear weights*. **Additional certified distributional theorem (Stage 166):**
-`proposed_rlsLinear_uniformInitial_couponSurvival_inclusionExclusion` in
-[`RLSUniformInitialCouponSurvivalInclusionExclusion.lean`](../ECRuntime/RLSUniformInitialCouponSurvivalInclusionExclusion.lean)
-proves the **exact finite-time survival formula** under positive weights,
-uniform initial state and one-bit mutation:
-`Σ_{j=1}^n (-1)^(j+1) binom(n,j) 2^(-j) (1-j/n)^t`.
-The complete public proof, concrete one-bit witness and strict axiom checks
-passed the Round 55 gate. This is a *new distributional strengthening* in
-the source's setting, **not** a claim that an otherwise missing numbered
-theorem of the cited paper was thereby proved. **Coverage of selected
-original-paper claims remains ~65%; neither original headline theorem has
-been reproduced in full.**
+**Not yet verified / not asserted**
 
-### P03 — He and Yao (2001): additive drift
+- Exhaustive **one-to-one matching of every auxiliary inequality and proof
+  detail** in the six-page source, including its exact error-bound conventions.
+  Both main numbered theorems have certified counterparts, but 95% is a
+  *headline-claim estimate*, not a guarantee that every auxiliary proposition
+  has been formalized.
+- Any extension of the source's RLS theorem to **arbitrary fitness functions
+  without coordinate monotonicity**, or to a different mutation operator;
+  these would be new hypotheses/results, not missing cases of Theorem 2.
 
-**Verified:** finite absorbing-chain additive-drift super-solution and hitting-time upper bounds, notably `additiveDrift_superSolution`, `additiveDrift_finiteHorizonBound`, `additiveDrift_runtimeSup_le` in [`AdditiveDrift.lean`](../ECRuntime/AdditiveDrift.lean) and `runtimeSup_le_of_superSolution` in [`UnrestrictedRuntime.lean`](../ECRuntime/UnrestrictedRuntime.lean). These realize an **upper-drift certificate in the repository's finite-state Markov setting**, not the paper's entire EA model.
+### P02b — Doerr and Doerr (2016): random-initialization comparisons (~25%)
 
-**Not established:** the full lower-drift/polynomial–exponential dichotomy as presented for the paper's broader random sequences, population/crossover setting, and all examples. These are different obligations from an additive upper certificate. **Coverage: ~20% (roughly one of five main families).** Do not attach a specific paper theorem number without checking the version-specific original text.
+**Verified headline subcase**
 
-### P04 — Doerr, Johannsen and Winzen (2012): multiplicative drift
+1. **RLS on OneMax:** the exact uniform-start mean and sharp `-1/2+o(1)`
+   correction are certified by
+   [`proposed_strictMonotoneRLS_allDimensionPaperSharpCentered`](../ECRuntime/RLSAllDimensionPaperSharpCentered.lean)
+   and [`proposed_strictMonotoneRLS_uniformInitial_runtimeFiniteCorrection`](../ECRuntime/DoerrDoerrMonotoneUniformMean.lean).
+2. **Related process/coupling calculations for RLS** are certified by
+   [`proposed_couponProcess_statewiseRuntime_eq_strictMonotoneRLS`](../ECRuntime/RandomStakeCouponStatewiseSurvivalCorrespondence.lean).
+   These strengthen the RLS portion but do not cover the paper's other
+   algorithm/problem pairs.
 
-**Source numbering:** **Theorem 3 (Multiplicative Drift)** in the accessible arXiv version, with upper bound `(1+log(s₀/s_min))/δ`.
+**Not yet verified headline results**
 
-**Verified:** `multiplicativeDrift_runtimeSup_le`, `multiplicativeDrift_finiteHorizonBound`, `multiplicativeDrift_superSolution` in [`MultiplicativeDrift.lean`](../ECRuntime/MultiplicativeDrift.lean), corresponding to the **finite-state specialization** of paper Theorem 3. The repository also proves positive-linear `O(n log n)` upper consequences under its concrete mutation hypotheses, e.g. [`WittStandardRuntimeAsymptotics.lean`](../ECRuntime/WittStandardRuntimeAsymptotics.lean); this is not a separate mechanization of all the paper's original linear-function analysis.
+- **`(1+1)` EA on OneMax:** bounded-additive discrepancy between uniform
+  and average-fitness initialization, with its source-specific coupling.
+- **RLS on LeadingOnes** and **`(1+1)` EA on LeadingOnes:** the
+  uniform-versus-average-initialization comparison and the precise
+  level-zero/one exit-time discrepancy decomposition.
+- The journal article's joint theorem formulation across the **four
+  algorithm/problem combinations** with its stated finite-size constants and
+  all initialization conventions. The P01 adaptive LeadingOnes runtime
+  theorem is not a substitute for this comparison.
 
-**Missing:** published constant-optimized `(1.39+o(1))e n log n` argument in its own parameterization, matching lower bounds, and minimum-spanning-tree/shortest-path/Euler-tour applications; general-process scope has not been checked for equivalence. **Coverage: ~30%.**
+### P03 — He and Yao (2001): average-time drift analysis (~20%)
 
-### P05 — Lehre and Witt (2014): general drift analysis with tails
+**Verified related headline specialization**
 
-**Verified-related specializations:** `multiplicativeDrift_firstHittingTime_tailMass_le` in [`MultiplicativeDriftTail.lean`](../ECRuntime/MultiplicativeDriftTail.lean), plus finite-state additive and multiplicative expectation bounds. These give a **special-case tail/expectation interface related to** the later general variable-drift framework; they do not by themselves establish the paper's general theorem.
+1. **Finite-state additive drift upper bound on hitting/optimization time:**
+   [`additiveDrift_runtimeSup_le`](../ECRuntime/AdditiveDrift.lean)
+   and [`additiveDrift_finiteHorizonBound`](../ECRuntime/AdditiveDrift.lean).
+2. **Drift formulation for finite Markov kernels:**
+   [`expectedValueAfter_mono`](../ECRuntime/Drift.lean)
+   and [`additiveDrift_superSolution`](../ECRuntime/AdditiveDrift.lean).
 
-**Missing:** the general variable-drift expectation and both-sided tail theorem with its full filtration/overshoot conditions; the specific sharp-concentration applications to the (1+1) EA, linear functions, LeadingOnes and permutations. **Coverage: ~15% (specialization only).** No publication theorem number is asserted here.
+**Not yet verified headline families**
 
-### P06 — Benjamin Doerr (2019): stochastic domination
+- General **exponential lower-time conditions** in the original formulation.
+- The source's **population-based selection/crossover/mutation** EA framework
+  and examples, beyond a finite transition kernel used in the library.
+- The complete range of **polynomial versus exponential complexity
+  classifications and concrete problem constructions** under the paper's
+  original hypotheses. A finite-state additive upper theorem is not a full
+  re-formalization of the 2001 paper.
 
-**Verified:** product-coupling and geometric-waiting domination, including `stochasticallyDominated_by_geometricWaitingSum_of_coupling` and `natTailDominated_by_geometricWaitingSum_of_coupling` in [`CouplingDomination.lean`](../ECRuntime/CouplingDomination.lean); `oneMaxUnary_hittingTime_stochasticDomination` in [`OneMaxUnaryStochasticDomination.lean`](../ECRuntime/OneMaxUnaryStochasticDomination.lean); supporting tail and fitness-level results in [`LevelExitDomination.lean`](../ECRuntime/LevelExitDomination.lean) and [`StochasticDomination.lean`](../ECRuntime/StochasticDomination.lean).
+### P04 — Doerr, Johannsen and Winzen (2012): multiplicative drift (~30%)
 
-**Missing:** universal `(μ,p)`-algorithm comparison under the full paper assumptions, fastest unbiased LeadingOnes operators, Chernoff-type tail bounds for sums of coupon-collector runtimes, and the other paper-wide distributional examples. **Coverage: ~35% (selected families).** No unverified paper theorem number is assigned; the precise Lean declarations above are the anchors.
+**Verified headline specializations**
 
-### P07 — Buzdalov, Doerr, Doerr and Vinokurov (2020/2022): fixed target
+1. **Finite-state multiplicative-drift expected-time theorem:**
+   [`multiplicativeDrift_runtimeSup_le`](../ECRuntime/MultiplicativeDrift.lean)
+   and [`multiplicativeDrift_finiteHorizonBound`](../ECRuntime/MultiplicativeDrift.lean)
+   yield the logarithmic-potential runtime certificate.
+2. **Associated hitting-time tail/survival bound:**
+   [`multiplicativeDrift_firstHittingTime_tailMass_le`](../ECRuntime/MultiplicativeDriftTail.lean).
+3. **Linear objective special case** via positive-linear mutation
+   certificates, including
+   [`wittStandard_runtimeSup_le_asymptotic_upperBound`](../ECRuntime/WittStandardRuntimeAsymptotics.lean).
+   This is mathematical overlap with the drift paper, not a separate proof of
+   its originally published constant `1.39e` argument.
 
-**Source numbering checked against arXiv v3:** **Lemma 3** states the exact binomial/harmonic average `2^{-n} Σ_k binom(n,k) H_k = H_n - Σ_{j=1}^n 1/(j 2^j)`. **Theorem 4** gives full LeadingOnes fixed-target formulas for several algorithms; **Theorem 5** gives OneMax fixed-target bounds for a broader family of mutation operators.
+**Not yet verified headline families**
 
-**Verified matches:**
+- The paper's **specific `(1.39+o(1))e n ln n`** proof in its own
+  parameterization and its **matching lower `e n ln n`** result.
+- Complete **minimum-spanning-tree, shortest-path, and Euler-tour**
+  applications and their problem-specific constants.
+- Any **general-state-process formulation** beyond the finite Markov-state
+  assumptions actually used by the certified modules.
 
-- **Paper Lemma 3, exact equality:** `proposed_binomialHarmonicAverage_closedForm` in [`BinomialHarmonicAverageClosedForm.lean`](../ECRuntime/BinomialHarmonicAverageClosedForm.lean); the one-step recurrence is `proposed_binomialHarmonicAverage_oneStep` in [`BinomialHarmonicAverageOneStep.lean`](../ECRuntime/BinomialHarmonicAverageOneStep.lean).
-- **Paper Theorem 5, one-bit RLS subcase:** `rlsLinear_fixedTarget_runtimeSup_eq` in [`RLSFixedTarget.lean`](../ECRuntime/RLSFixedTarget.lean) proves `n(H_d-H_r)` from `d` zero bits to `r`; the paper covers additional rates/algorithms and initializations, not claimed here.
-- **Paper Theorem 4, full-target (`k=n`) fixed-rate LeadingOnes subcase:** `leadingOnesUniformFirstHittingTimeExpectation_eq_formula` in [`LeadingOnesOccupationTotalClosure.lean`](../ECRuntime/LeadingOnesOccupationTotalClosure.lean). This does not prove its formula for *each intermediate target* and all listed algorithms.
+### P05 — Lehre and Witt (2014): general drift and two-sided tails (~15%)
 
-**Missing:** the general fixed-target fitness-level statements and other applications/variants in their paper, including mutation-operator and multi-individual cases. **Coverage: ~30%; the Lemma 3 claim is fully certified, but paper Theorems 4 and 5 only in specified cases.**
+**Verified related specializations**
 
-### P08 — Jansen and Zarges (2014): fixed-budget analysis
+1. [`multiplicativeDrift_firstHittingTime_tailMass_le`](../ECRuntime/MultiplicativeDriftTail.lean)
+   gives a specific upper-tail estimate for a finite-state multiplicative
+   drift process.
+2. [`additiveDrift_runtimeSup_le`](../ECRuntime/AdditiveDrift.lean)
+   and [`proposed_genericFixedTarget_additiveDrift_runtimeLower`](../ECRuntime/GenericFixedTargetAdditiveDriftLower.lean)
+   cover expectation-side special cases under explicit potential and drift
+   assumptions.
 
-**Verified overlap:** `rlsLinear_fixedBudget_expectedZeros_eq` in [`RLSFixedBudget.lean`](../ECRuntime/RLSFixedBudget.lean) proves `E[Z_t|Z₀=d]=d(1-1/n)^t` for one-bit RLS on positive linear functions; `proposed_rlsLinear_uniformInitial_fixedBudgetExpectedZeros` in [`RLSUniformInitialFixedBudgetMean.lean`](../ECRuntime/RLSUniformInitialFixedBudgetMean.lean) specializes uniform initialization. These are explicit **OneMax/RLS-type fixed-budget results** matching the theme, not a proof of every statement in the paper.
+**Not yet verified headline families**
 
-**Missing:** fixed-budget analysis for the paper's other algorithms and test functions (including (1+1) EA, LeadingOnes, Jump and Ridge), its general lower bounds and regime comparisons. **Coverage: ~20%.** Publication theorem numbering for the matched finite-budget case was not verified.
+- The paper's **general variable-drift theorem with both upper and lower
+  hitting-time tails**, including its overshoot and filtration hypotheses.
+- The **sharp concentration applications** to the `(1+1)` EA on general
+  linear functions, LeadingOnes, and the other benchmark functions.
+- Its **random-permutation cycle** application and general-process
+  specializations. The generic drift modules do not imply all these claims.
 
-### P09 — Doerr, Le, Makhmara and Nguyen (2017): Fast Genetic Algorithms
+### P06 — Doerr (2019): stochastic domination (~35%)
 
-**Source numbering:** **Theorem 1** (arXiv v2) gives two-sided bounds on the *full* `(1+1)` EA optimization time of Jump, using the plateau-escape term as a dominant component.
+**Verified headline specializations**
 
-**Verified supporting part, not the theorem in full:** `jump_plateau_oneStepSuccessMass`, `jump_plateau_runtimeSup_eq_geometricMean`, `jump_plateau_runtimeTail_eq_geometric` in [`JumpPlateauEscape.lean`](../ECRuntime/JumpPlateauEscape.lean), and `candidateJumpEscape_fixedRate_optimal` in [`JumpEscapeOptimalRate.lean`](../ECRuntime/JumpEscapeOptimalRate.lean), proving the conditional plateau-escape probability, geometric waiting and optimal fixed escape probability. **This is not a certified full-runtime version of paper Theorem 1.**
+1. **Geometric-waiting sum domination via coupling:**
+   [`stochasticallyDominated_by_geometricWaitingSum_of_coupling`](../ECRuntime/CouplingDomination.lean)
+   and [`natTailDominated_by_geometricWaitingSum_of_coupling`](../ECRuntime/CouplingDomination.lean).
+2. **Fitness-level exit-time stochastic domination:**
+   [`natTailDominated_transitionTrajectoryLevelExit_geometricWaitingTime`](../ECRuntime/LevelExitDomination.lean)
+   and [`stochasticallyDominated_refl`](../ECRuntime/StochasticDomination.lean).
+3. **OneMax unary operator subcase:**
+   [`oneMaxUnary_hittingTime_stochasticDomination`](../ECRuntime/OneMaxUnaryStochasticDomination.lean).
 
-**Missing:** time to reach the plateau, the corresponding global upper/lower bounds, heavy-tailed mutation runtime for Jump, sensitivity lower bounds, and graph-optimization applications. **Coverage: ~20%.**
+**Not yet verified headline families**
 
-### P10 — Carsten Witt (2013): tight linear-function optimization
+- The paper's universal **`(μ,p)` mutation-based algorithm versus OneMax**
+  stochastic comparison for its full class of objectives/operators.
+- The **fastest unbiased LeadingOnes algorithm** in the general and static
+  operator classes, as distinct from the P01 bit-mutation-rate optimization.
+- The source's **Chernoff-type bound for sums of independent coupon-collector
+  runtimes**, additional distributional examples, and all resulting sharp
+  tail estimates.
 
-**Verified:** standard mutation rate `p=1/n` sharp upper envelope and linear correction, including `wittStandardRuntimeUpperBound_eq_enlogn_add_bigO_n` and `wittStandard_runtimeSup_le_asymptotic_upperBound` in [`WittStandardRuntimeAsymptotics.lean`](../ECRuntime/WittStandardRuntimeAsymptotics.lean); exponential-tail machinery in [`WittStandardRuntimeTail.lean`](../ECRuntime/WittStandardRuntimeTail.lean); restricted fixed-scale `p=c/n` upper and tail bounds for `0<c≤log 3` in [`WittMutationLogThreeRuntime.lean`](../ECRuntime/WittMutationLogThreeRuntime.lean).
+### P07 — Buzdalov, Doerr, Doerr and Vinokurov: fixed targets (~40%)
 
-**Scope restriction:** theorem statements must be read with their **weight-ordering/positivity** and dimension hypotheses. These results are not automatically the paper's unrestricted uniform-in-weights assertion. **Missing:** matching lower bounds (including universal `e n log n` lower bounds), all mutation-rate regimes, universal optimality across all mutation-based algorithms, and the full sharp tail conclusions. **Coverage: ~35%.**
+**Verified headline results and subcases**
 
-### P11 — Doerr, Janett and Lengler (2024): static unary unbiased mutation
+1. **Paper Lemma 3 (binomial/harmonic identity):**
+   [`proposed_binomialHarmonicAverage_closedForm`](../ECRuntime/BinomialHarmonicAverageClosedForm.lean)
+   proves `2⁻ⁿ Σ_k binom(n,k) H_k = H_n - Σ_{j=1}^n 1/(j2^j)`.
+2. **Paper Theorem 5, RLS/OneMax subcase:**
+   [`rlsLinear_fixedTarget_runtimeSup_eq`](../ECRuntime/RLSFixedTarget.lean)
+   proves `n(H_d - H_r)` from `d` zero bits to a target with at most `r`;
+   [`proposed_strictMonotoneRLS_fixedTarget_runtimeReal_allInitialStates`](../ECRuntime/RLSStrictMonotoneFixedTargetExact.lean)
+   extends this to the stated coordinate-monotone fitness class.
+3. **Paper Theorem 4, fixed-rate LeadingOnes uniform-start subcase:**
+   [`proposed_leadingOnes_uniformFixedTarget_mean_eq_levelSum`](../ECRuntime/LeadingOnesFixedTargetCandidate.lean),
+   plus target monotonicity and increment/curvature lemmas in
+   [`LeadingOnesFixedTargetMeanMonotone.lean`](../ECRuntime/LeadingOnesFixedTargetMeanMonotone.lean)
+   and [`LeadingOnesFixedTargetIncrement.lean`](../ECRuntime/LeadingOnesFixedTargetIncrement.lean).
+4. **Additional restricted fixed-target lower bounds:**
+   [`proposed_oneMaxEA_thresholdRuntime_ge_excessZeroCount_div_np`](../ECRuntime/OneMaxEAThresholdRuntimeLower.lean)
+   and [`proposed_unaryOneMax_thresholdRuntime_ge_excessZeroCount_div_meanRadius`](../ECRuntime/UnaryOneMaxThresholdRuntimeLower.lean).
+   These do not prove the entire paper's general mutation-operator theorems.
 
-**Source-paper support, not its main theorem:** `coordinateFlipMass_eq_meanRadius_div` in [`StaticUnaryUnbiasedFlipMarginals.lean`](../ECRuntime/StaticUnaryUnbiasedFlipMarginals.lean) is explicitly marked as the paper's **Lemma 2** (uniform coordinate-flip marginal), within the repository's Hamming-radius-invariant mutation model. Further certified supporting results: `correctedLinearPotential_runtimeSup_le_sharpUpper_uniform_moments` in [`StaticUnaryUnbiasedSharpMomentUpper.lean`](../ECRuntime/StaticUnaryUnbiasedSharpMomentUpper.lean) and restricted results in [`StaticUnaryUnbiasedCorrectedRuntime.lean`](../ECRuntime/StaticUnaryUnbiasedCorrectedRuntime.lean), [`StaticUnaryUnbiasedLinearAcceptedEvents.lean`](../ECRuntime/StaticUnaryUnbiasedLinearAcceptedEvents.lean).
+**Not yet verified headline families**
 
-**CRITICAL NONCOVERAGE:** neither unrestricted general-linear sharp upper nor lower runtime theorem is formally proved. A mean mutation radius alone does not resolve the accepted-event size-bias/second-factorial-moment gap. **Coverage: ~15% of selected supporting/partial clusters; 0 of 2 unrestricted headline upper/lower claims.**
+- **Full Theorems 4 and 5** across all operators, initialization classes,
+  mutation rates and parameter ranges treated in the source.
+- Paper-wide **generic fixed-target fitness-level bounds**, population/
+  multi-individual cases, and applications outside the certified OneMax/RLS
+  and fixed-rate LeadingOnes subfamilies.
+- Matching **all sharp constants, lower and upper bounds and distributional
+  conclusions** in the source's broad fixed-target analysis.
 
-### P12 — Droste, Jansen and Wegener (2002): early (1+1) EA analysis
+### P08 — Jansen and Zarges (2014): fixed-budget performance (~20%)
 
-**Verified mathematical overlap, not a recreated original proof:** the positive-linear `O(n log n)` statement at `p=1/n` follows from the stronger standard-rate certificate in [`WittStandardRuntimeAsymptotics.lean`](../ECRuntime/WittStandardRuntimeAsymptotics.lean), together with its finite upper bound and asymptotic regime. This is a *derived and overlapping* implication; the original paper uses different techniques.
+**Verified headline special case**
 
-**Missing:** necessity/large-rate counterexamples, exponential-time hard nonlinear examples, hierarchy results, and all original case-specific methods. **Coverage: ~15%.** Not an independently reconstructed source-theorem proof or an additional promoted Lean stage.
+1. **One-bit RLS expected remaining zero count** after budget `t`,
+   `E[Z_t | Z_0=d] = d(1-1/n)^t`:
+   [`rlsLinear_fixedBudget_expectedZeros_eq`](../ECRuntime/RLSFixedBudget.lean).
+2. **Uniform-start fixed-budget mean** as a special case:
+   [`proposed_rlsLinear_uniformInitial_fixedBudgetExpectedZeros`](../ECRuntime/RLSUniformInitialFixedBudgetMean.lean).
+3. Related **one-bit/unary expected-zero upper bounds** appear in
+   [`RLSFixedBudget.lean`](../ECRuntime/RLSFixedBudget.lean) but do not by
+   themselves establish the original paper's other fixed-budget theorems.
 
-## Certified results not attributed to one specific paper
+**Not yet verified headline families**
 
-The following reusable theorems are certified but are not assigned artificial paper-level coverage percentages: [`FiniteTrajectory.lean`](../ECRuntime/FiniteTrajectory.lean), [`HittingTime.lean`](../ECRuntime/HittingTime.lean), [`BellmanFiniteExactRuntime.lean`](../ECRuntime/BellmanFiniteExactRuntime.lean), [`FiniteRuntimeSurvivalSupport.lean`](../ECRuntime/FiniteRuntimeSurvivalSupport.lean), [`UniformMutationExact.lean`](../ECRuntime/UniformMutationExact.lean), [`StochasticDomination.lean`](../ECRuntime/StochasticDomination.lean), and the foundational bitstring, transition and first-entry interfaces. Some are useful **new specializations or stronger statements**, not verbatim theorems from any one cited paper.
+- The source's **`(1+1)` EA fixed-budget** expected-quality upper and lower
+  bounds.
+- **LeadingOnes, Jump, Ridge** and other test-function regimes, including
+  the corresponding budget-dependent comparisons.
+- The full set of source-specific **fixed-budget lower bounds and tight
+  quality tradeoffs**; only an RLS/OneMax-type slice is matched here.
 
-## Full coverage / remaining research frontier
+### P09 — Doerr, Le, Makhmara and Nguyen (2017): fast genetic algorithms (~20%)
 
-**Source papers with 100% audited coverage: none (0).** In particular, a proof of P01's optimal *fixed* rate does not cover adaptive rates; P02's `-log 2` finite-mean result does not supply its parity-sensitive `-1/2` expansion or the full monotone-function hypothesis; P09's plateau escape is not total Jump runtime; and P11 has no unrestricted headline theorem.
+**Verified supporting results / subcases**
 
-Priority research pathways are maintained in [`OPEN_PROBLEMS.md`](OPEN_PROBLEMS.md). At the present checkpoint: parity-corrected P02 `-1/2` refinement; adaptive P01 policy; broader fixed-target/fixed-budget and stochastic domination; and the separate Witt/DJL open frontier. A future editor should update this catalogue **only after** a compiler-gated theorem promotion *and* a fresh source-paper scope comparison.
+1. **Jump plateau one-step escape probability and geometric residence:**
+   [`jump_plateau_oneStepSuccessMass`](../ECRuntime/JumpPlateauEscape.lean),
+   [`jump_plateau_runtimeSup_eq_geometricMean`](../ECRuntime/JumpPlateauEscape.lean),
+   and [`jump_plateau_runtimeTail_eq_geometric`](../ECRuntime/JumpPlateauEscape.lean).
+2. **Best fixed mutation rate for plateau escape:**
+   [`candidateJumpEscape_fixedRate_optimal`](../ECRuntime/JumpEscapeOptimalRate.lean)
+   establishes the local probability maximum at `p=k/n` for the indicated
+   plateau size/rate assumptions.
 
-## Source and audit links
+**Not yet verified headline families**
 
-- Full verified local import graph: [`../ECRuntime.lean`](../ECRuntime.lean). Compiler gate and axiom checker: [`../scripts/verify.ps1`](../scripts/verify.ps1), [`../scripts/audit.lean`](../scripts/audit.lean).
-- Specific source numbers checked from **P02**: [Doerr–Doerr, arXiv:1308.6384, Theorems 1–2](https://arxiv.org/pdf/1308.6384); **P04**: [Doerr–Johannsen–Winzen, arXiv:1101.0776, Theorem 3](https://arxiv.org/pdf/1101.0776); **P07**: [Buzdalov et al., arXiv:2004.09613, Lemma 3 and Theorems 4–5](https://arxiv.org/pdf/2004.09613); **P09**: [Fast Genetic Algorithms, arXiv:1703.03334, Theorem 1](https://arxiv.org/pdf/1703.03334).
-- Other publication links appear in the overview. This is an evidence-oriented, deliberately conservative source mapping. In particular, **the absence of an independently verified paper theorem number is not repaired by inventing one**.
+- **Paper Theorem 1's complete Jump optimization runtime** (the approach
+  phase plus escaping the plateau), including its two-sided global bounds.
+- **Sensitivity and slow-down bounds** for perturbed fixed rates and the
+  full source-specific parameter ranges.
+- **Heavy-tailed mutation algorithms** and their almost-optimal Jump
+  runtime guarantees; the **matching/vertex-cover** graph applications.
+  A geometric plateau escape calculation is not a full fast-GA theorem.
+
+### P10 — Witt (2013): linear-function runtime bounds (~35%)
+
+**Verified headline subcases**
+
+1. **Standard-rate upper bound with the sharp leading `e n log n` term
+   and `O(n)` correction:**
+   [`wittStandard_runtimeSup_le_asymptotic_upperBound`](../ECRuntime/WittStandardRuntimeAsymptotics.lean)
+   and [`wittStandardRuntimeUpperBound_eq_enlogn_add_bigO_n`](../ECRuntime/WittStandardRuntimeAsymptotics.lean).
+2. **First-hitting-time upper/tail bounds** under the stated positive and
+   nonincreasing weight restrictions:
+   [`wittStandard_firstHittingTime_tailMass_le_geometric`](../ECRuntime/WittStandardRuntimeTail.lean).
+3. **Scaled fixed rate `p=c/n` in the certified `0<c≤log 3` regime:**
+   [`wittMutation_runtimeSup_le_exactRate_upperBound_logThreeScale`](../ECRuntime/WittMutationLogThreeRuntime.lean)
+   and [`wittMutation_firstHittingTime_tailMass_le_exp_shifted_logThreeScale`](../ECRuntime/WittMutationLogThreeRuntime.lean).
+
+**Not yet verified headline families**
+
+- **Matching `e n log n` lower bounds**, including the universal lower
+  bound across mutation-based algorithms, with the original source's full
+  assumptions.
+- **All mutation rates `p`** and the sharp constant/scaling conclusions
+  outside the restricted `c≤log 3` range.
+- The **unrestricted optimality of `p=1/n`** across the stated linear-function
+  class and full tight high-probability/tail theorem under the original
+  weight-ordering and algorithmic hypotheses.
+
+### P11 — Doerr, Janett and Lengler (2024): static unary unbiased mutation (~20% support; 0% unrestricted headline bounds)
+
+**Verified supporting theorems and restricted consequences**
+
+1. **Coordinate-flip marginal (paper Lemma 2-type statement):**
+   [`coordinateFlipMass_eq_meanRadius_div`](../ECRuntime/StaticUnaryUnbiasedFlipMarginals.lean)
+   proves uniform coordinate mass `E[K]/n` for the certified symmetric-radius
+   mutation-law model.
+2. **Mutation-radius moment and pair-marginal inequalities:**
+   [`proposed_secondFactorialRadiusMoment_le_dimPred_mul_meanRadius`](../ECRuntime/StaticUnarySecondFactorialRadiusBound.lean)
+   and related bounds in
+   [`StaticUnaryUnbiasedPairMarginals.lean`](../ECRuntime/StaticUnaryUnbiasedPairMarginals.lean).
+3. **Restricted corrected-potential upper estimates:**
+   [`correctedLinearPotential_runtimeSup_le_sharpUpper_uniform_moments`](../ECRuntime/StaticUnaryUnbiasedSharpMomentUpper.lean)
+   and [`correctedLinearPotential_runtimeSup_le`](../ECRuntime/StaticUnaryUnbiasedCorrectedRuntime.lean).
+   The former has explicit *extra uniform moment requirements*; it is not
+   automatically the paper's full general-linear upper theorem.
+4. **Separate OneMax/unary lower-drift special cases**, e.g.
+   [`proposed_unaryOneMax_harmonicRuntime_of_scaledDriftCap`](../ECRuntime/UnaryOneMaxHarmonicLowerScaled.lean),
+   address the stated drift-cap subclass, not arbitrary accepted-event
+   behavior on positive linear functions.
+
+**Not yet verified headline results**
+
+- **General sharp upper** `(1+o(1)) n ln n / p₁` for the original source's
+  full permitted static unary-unbiased operator class, mean-radius bounds
+  and assumptions *without strengthening them to second-moment conditions*.
+- **General matching lower** bound under the original (potentially different)
+  constraints on `p₁`, mean radius `χ` and the initial distribution.
+- **Unbounded-mean-radius contrasting examples** and their source-specific
+  qualitative trajectory/runtime conclusions.
+
+**Do not count the two unrestricted headline theorems as proved.** The
+accepted-event radius and size-bias issues are not discharged by a coordinate
+marginal identity alone. The percentage refers to selected supporting and
+restricted result families only.
+
+### P12 — Droste, Jansen and Wegener (2002): `(1+1)` EA (~15% overlapping consequence)
+
+**Verified mathematical overlap**
+
+1. **Positive-linear `O(n log n)` expected runtime at the standard
+   `p=1/n` rate**, as a consequence of the *later, sharper*
+   [`wittStandard_runtimeSup_le_asymptotic_upperBound`](../ECRuntime/WittStandardRuntimeAsymptotics.lean)
+   and [`wittStandardRuntimeUpperBound_eq_enlogn_add_bigO_n`](../ECRuntime/WittStandardRuntimeAsymptotics.lean).
+   This is a consequence under the Lean weight assumptions, **not** a
+   standalone re-formalization of the 2002 paper's proof.
+
+**Not yet verified headline families**
+
+- The paper's **necessary mutation-rate regime** claims and large-rate
+  examples showing that the `O(n log n)` behavior need not persist.
+- **Exponential-time examples for a degree-two polynomial and a unimodal
+  function**.
+- The source's **hierarchy theorem and remaining complexity separations**.
+  No certified source theorem is currently mapped to those claims.
+
+## Important distinctions and next audit actions
+
+1. **No false 100% claims.** P02a's two numbered headline theorems have direct
+   counterparts, but no exhaustive formal theorem-by-theorem transcription
+   of the publication is asserted. Every other paper has substantial missing
+   headline families. In particular, P11 has **zero** unrestricted sharp
+   upper/lower theorems.
+2. **Research queue closure is not publication completeness.** The audited
+   source checkpoint's registry had no active candidates; this minimal merge
+   does not copy that registry. This does not imply that unformalized source
+   theorems have disappeared. A new paper-level target needs its own approved
+   Lean statement under matched published hypotheses.
+3. **Some source-related results are stronger or different, not duplicates.**
+   Higher moments, arbitrary-target coupon transfers, boundary-rate
+   LeadingOnes lemmas and generic drift infrastructure deserve citation as
+   independently certified mathematics, but they do not automatically
+   increase coverage of every source paper.
+4. **For a future 100% certification claim:** fix the particular published
+   version, enumerate its numbered results and substantial corollaries, record
+   assumptions and initial distributions verbatim, and link each to an
+   imported Lean statement or explicitly mark it absent.
+
+For the exact Lean hypotheses and theorem interfaces, follow the source links
+above. The main branch's [historical literature frontier](FORMALIZED_RESULTS_AND_LITERATURE_FRONTIER.md)
+and [historical roadmap](LITERATURE_ROADMAP.md) remain for context, but predate
+the 547-module checkpoint. The merge preserves the main verification workflow except for an explicit
+extension of the public-facade list in `scripts/audit.lean`; see `README.md`
+for verification instructions and the outstanding local Lean build requirement. See
+[`P02_THEOREM_TO_PAPER_AUDIT.md`](P02_THEOREM_TO_PAPER_AUDIT.md) for the
+separate P02a/P02b interpretation and verified coupon/RLS declarations.
