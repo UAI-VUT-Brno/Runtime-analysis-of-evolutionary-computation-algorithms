@@ -1,0 +1,130 @@
+<#
+.SYNOPSIS
+  Regenerate docs/current/facades.md, the index of every public facade module.
+
+.DESCRIPTION
+  The facade lists come from the compiled environment via
+  `scripts/audit.lean json`, never from a copy kept here. Everything else is read
+  from the sources:
+
+  * the module's non-private theorems, and the first sentence of the first theorem
+    doc comment as a summary;
+  * the docs/current/papers/ files that link the module -- the only
+    authoritative paper assignment;
+  * the paper label (P01..P12) the module's own doc comment carries, shown as an
+    unaudited source label, because the merged modules were labelled by the
+    source checkpoint;
+  * which theorems are statement-pinned in ECRuntimeTest.
+
+  The output is a generated artifact like docs/current/graphs/*.mmd: regenerate it, never
+  edit it by hand. Nothing is written outside the repository.
+
+.EXAMPLE
+  pwsh -File scripts\facade_index.ps1
+#>
+[CmdletBinding()]
+param()
+
+$ErrorActionPreference = 'Stop'
+$repo = Split-Path -Parent $PSScriptRoot
+# Forward slashes throughout: CI runs this script on Linux.
+$out  = Join-Path $repo 'docs/current/facades.md'
+
+# --- facade lists, from the compiled environment ------------------------------
+$tmp = Join-Path ([System.IO.Path]::GetTempPath()) ("ecruntime-state-{0}.json" -f [guid]::NewGuid())
+try {
+    & lake env lean --run (Join-Path $repo 'scripts/audit.lean') json --output $tmp | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "audit.lean json failed with exit code $LASTEXITCODE" }
+    $state = Get-Content -LiteralPath $tmp -Raw | ConvertFrom-Json
+} finally {
+    if (Test-Path -LiteralPath $tmp) { Remove-Item -LiteralPath $tmp -Force }
+}
+
+function Get-Short([string]$n) { $n -replace '^ECRuntime\.', '' }
+$facades = @()
+foreach ($f in $state.facades)               { $facades += [pscustomobject]@{ Module = Get-Short $f; Origin = 'original' } }
+foreach ($f in $state.merged_public_facades) { $facades += [pscustomobject]@{ Module = Get-Short $f; Origin = 'merged' } }
+
+# --- paper-audit citations: module -> paper files ------------------------------
+$cited = @{}
+foreach ($p in Get-ChildItem -LiteralPath (Join-Path $repo 'docs/current/papers') -Filter '*.md' | Sort-Object Name) {
+    $text = Get-Content -LiteralPath $p.FullName -Raw -Encoding utf8
+    foreach ($m in [regex]::Matches($text, '\]\((?:\.\./)+ECRuntime/([A-Za-z0-9_]+)\.lean\)')) {
+        $mod = $m.Groups[1].Value
+        if (-not $cited.ContainsKey($mod)) { $cited[$mod] = [System.Collections.Generic.SortedSet[string]]::new() }
+        [void]$cited[$mod].Add($p.BaseName)
+    }
+}
+
+# --- statement pins ------------------------------------------------------------
+$pinned = [System.Collections.Generic.HashSet[string]]::new()
+foreach ($p in Get-ChildItem -LiteralPath (Join-Path $repo 'ECRuntimeTest') -Filter '*StatementPins.lean') {
+    foreach ($m in [regex]::Matches((Get-Content -LiteralPath $p.FullName -Raw -Encoding utf8), '#check @ECRuntime\.(\S+)')) {
+        [void]$pinned.Add(($m.Groups[1].Value -split '\.')[-1])
+    }
+}
+
+function Format-Cell([string]$s) { ($s -replace '\|', '\|' -replace '\s+', ' ').Trim() }
+
+# --- per-module facts from the source -------------------------------------------
+$rows = foreach ($f in $facades) {
+    $src = Get-Content -LiteralPath (Join-Path $repo "ECRuntime/$($f.Module).lean") -Raw -Encoding utf8
+    $doc = ''
+    if ($src -match '(?s)/-!(.*?)-/') { $doc = $Matches[1] }
+    # The summary comes from the first documented theorem, not the module comment: merged
+    # module comments open with provenance and approval states that are no longer current.
+    $thmDoc = ''
+    if ($src -match '(?s)/--(.*?)-/\s*(?:@\[[^\]]*\]\s*)?(?:protected\s+)?theorem\s') { $thmDoc = $Matches[1] }
+    $prose = ($thmDoc -replace '\s+', ' ').Trim()
+    $sentence = if ($prose -match '^(.+?\.)(\s|$)') { $Matches[1] } else { $prose }
+    $sentence = Format-Cell $sentence
+    if ($sentence.Length -gt 160) { $sentence = $sentence.Substring(0, 157) + '...' }
+    $labels = [regex]::Matches($doc, '\bP(0[1-9]|1[0-2])[ab]?\b') | ForEach-Object { $_.Value } | Sort-Object -Unique
+    $thms = [regex]::Matches($src, '(?m)^(?:@\[[^\]]*\]\s*)?(?:protected\s+)?theorem\s+([^\s:({\[]+)') |
+        ForEach-Object { $_.Groups[1].Value }
+    $pinnedThms = @($thms | Where-Object { $pinned.Contains(($_ -split '\.')[-1]) })
+    [pscustomobject]@{
+        Module   = $f.Module
+        Origin   = $f.Origin
+        Cited    = if ($cited.ContainsKey($f.Module)) { (($cited[$f.Module] | ForEach-Object { "[$_](papers/$_.md)" }) -join ', ') } else { '' }
+        Label    = ($labels -join ', ')
+        Theorems = @($thms)
+        Pinned   = $pinnedThms.Count
+        Summary  = $sentence
+    }
+}
+
+# --- render ---------------------------------------------------------------------
+$lines = [System.Collections.Generic.List[string]]::new()
+$lines.Add('# Public facade index')
+$lines.Add('')
+$lines.Add('<!-- Generated by scripts/facade_index.ps1. Regenerate it; never edit it by hand. -->')
+$lines.Add('')
+$lines.Add("The $($facades.Count) public facade modules from which ``scripts/audit.lean`` measures reachability: " +
+    "$(@($facades | Where-Object Origin -eq 'original').Count) original and " +
+    "$(@($facades | Where-Object Origin -eq 'merged').Count) from the 547-module merge.")
+$lines.Add('')
+$lines.Add('- **Paper audit** is authoritative: the files in [`papers/`](papers/) that link the module.')
+$lines.Add('- **Source label** is the paper id written in the module''s own doc comment. For merged modules')
+$lines.Add('  it is the source checkpoint''s label, not audited against the paper files.')
+$lines.Add('- **Summary** is the first sentence of the module''s first theorem doc comment, verbatim.')
+$lines.Add('  Module doc comments are not quoted: in merged modules they still carry the source')
+$lines.Add('  checkpoint''s approval states, which are not current (see [`history/repository.md`](../history/repository.md)).')
+$lines.Add('- **Pinned** counts theorems with a statement pin in `ECRuntimeTest`.')
+$lines.Add('')
+$lines.Add('| Module | Origin | Paper audit | Source label | Theorems | Pinned | Summary |')
+$lines.Add('|---|---|---|---|---:|---:|---|')
+foreach ($r in ($rows | Sort-Object Module)) {
+    $lines.Add("| ``$($r.Module)`` | $($r.Origin) | $($r.Cited) | $($r.Label) | $($r.Theorems.Count) | $($r.Pinned) | $($r.Summary) |")
+}
+$lines.Add('')
+$lines.Add('## Theorems by facade')
+$lines.Add('')
+foreach ($r in ($rows | Sort-Object Module)) {
+    if ($r.Theorems.Count -eq 0) { continue }
+    $lines.Add("- ``$($r.Module)``: " + (($r.Theorems | ForEach-Object { "``$_``" }) -join ', '))
+}
+
+$text = ($lines -join "`n") + "`n"
+[System.IO.File]::WriteAllText($out, $text, [System.Text.UTF8Encoding]::new($false))
+Write-Host "wrote $out ($($facades.Count) facades)"

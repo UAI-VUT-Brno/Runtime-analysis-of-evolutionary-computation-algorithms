@@ -1,0 +1,75 @@
+{
+  "permissions": {
+    "ask": [
+      "Edit",
+      "Write",
+      "NotebookEdit",
+      "Bash",
+      "PowerShell"
+    ],
+    "deny": [
+      "Artifact",
+      "WebFetch",
+      "WebSearch",
+      "mcp__claude_ai_Claude_Docs__batch",
+      "mcp__claude_ai_Claude_Docs__create",
+      "mcp__claude_ai_Claude_Docs__update",
+      "mcp__claude_ai_Claude_Docs__export",
+      "mcp__claude_ai_Claude_Docs__delete",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(git push:*)",
+      "Bash(git remote:*)",
+      "Bash(git clone:*)",
+      "Bash(git fetch:*)",
+      "Bash(git pull:*)",
+      "Bash(gh:*)",
+      "Bash(gitea:*)",
+      "Bash(jenkins:*)",
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+      "Bash(rsync:*)",
+      "Bash(sftp:*)",
+      "Bash(nc:*)",
+      "Bash(pip install:*)",
+      "Bash(pip3 install:*)",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(cargo install:*)",
+      "PowerShell(Invoke-WebRequest:*)",
+      "PowerShell(Invoke-RestMethod:*)",
+      "PowerShell(iwr:*)",
+      "PowerShell(irm:*)",
+      "PowerShell(Start-BitsTransfer:*)",
+      "PowerShell(git push:*)",
+      "PowerShell(git remote:*)",
+      "PowerShell(gh:*)",
+      "PowerShell(gitea:*)",
+      "PowerShell(jenkins:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -NoProfile -File \"$CLAUDE_PROJECT_DIR/scripts/hooks/guard_lean_write.ps1\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -NoProfile -File \"$CLAUDE_PROJECT_DIR/scripts/hooks/guard_outbound.ps1\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

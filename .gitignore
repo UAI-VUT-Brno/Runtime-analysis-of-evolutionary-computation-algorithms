@@ -1,0 +1,40 @@
+# Lean/Lake generated files
+.lake/
+
+# Verification outputs
+.verify/
+*_build_results/
+*_build_results.zip
+*_review.txt
+*.log
+
+# Repository exports
+ECRuntime_stage*_repository.zip
+ECRuntime_stage*_repository.zip.sha256
+ECRuntime_stage*_repository.manifest.txt
+# Written into the export ZIP by scripts/export_repository.ps1, never onto disk and
+# never a maintained source file (it is absent from the exporter's root whitelist).
+# A copy in the working tree is a leftover from the earlier Python exporter.
+# See DEVELOPMENT.md section 6.
+EXPORT_MANIFEST.txt
+
+# Patch artifacts
+stage*_patch.zip
+stage*_overlay.zip
+
+# Python bytecode caches, generated whenever a scripts/*.py module is imported
+__pycache__/
+*.py[cod]
+
+# Per-machine permission grants: local state, specific to one developer's machine.
+# The rest of .claude/ is versioned, as are CLAUDE.md and SOUL.md, so that the working
+# rules and the guard wiring travel with the repository.
+.claude/settings.local.json
+
+# Editor / OS artifacts
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*~
+*.swp

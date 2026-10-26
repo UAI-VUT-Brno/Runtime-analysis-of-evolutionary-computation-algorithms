@@ -1,0 +1,83 @@
+# Checks every pull request and every push to main. A green run is necessary, not
+# sufficient: whether a statement matches its paper is checked in review.
+#
+# In the private repository this file lives in scripts/public/ so that GitHub does not
+# run it there. `scripts/export_repository.ps1 -Profile public` publishes it as
+# .github/workflows/ci.yml; edit it here, never in the public repository alone.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install elan
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Restore Lake build cache
+        uses: actions/cache@v4
+        with:
+          path: .lake
+          key: lake-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            lake-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+
+      - name: Fetch the Mathlib build cache
+        run: lake exe cache get
+
+      - name: Build library and test suite
+        run: lake build 2>&1 | tee build.log
+
+      - name: Zero errors and warnings
+        run: |
+          if grep -nE '(^|\s)(error|warning):' build.log; then
+            echo "::error::the build reported errors or warnings; both count as failures"
+            exit 1
+          fi
+
+      - name: No set_option directives
+        run: |
+          if grep -nE '^\s*set_option\b' ECRuntime/*.lean ECRuntimeTest/*.lean; then
+            echo "::error::set_option is not permitted"
+            exit 1
+          fi
+
+      - name: Audit (axioms, doc comments, unused hypotheses, reachability)
+        run: lake env lean --run scripts/audit.lean strict | tee audit.log
+
+      - name: No new audit warnings
+        run: |
+          grep '^warning:' audit.log | LC_ALL=C sort -u > audit-current.txt
+          new=$(LC_ALL=C comm -13 .github/audit-baseline.txt audit-current.txt)
+          if [ -n "$new" ]; then
+            echo "$new"
+            echo "::error::new audit warnings (not in .github/audit-baseline.txt)"
+            exit 1
+          fi
+
+      - name: Generated files are up to date
+        run: |
+          lake env lean --run scripts/audit.lean graph --all --outdir docs/current/graphs
+          pwsh -File scripts/facade_index.ps1
+          pwsh -File scripts/docs_index.ps1 -Check
+          if ! git diff --exit-code -- docs/current/graphs docs/current/facades.md docs/history/README.md docs/roadmap/papers/README.md; then
+            echo "::error::regenerate docs/current/graphs, docs/current/facades.md and the docs indexes, and commit them"
+            exit 1
+          fi

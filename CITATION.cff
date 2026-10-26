@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use ECRuntime, please cite it as below."
+title: "ECRuntime: Runtime analysis of evolutionary algorithms, machine-checked in Lean 4"
+type: software
+authors:
+  - family-names: "Kovar"
+    given-names: "Jiri"
+    orcid: "https://orcid.org/0000-0002-0444-0914"
+  - family-names: "Kůdela"
+    given-names: "Jakub"
+    orcid: "https://orcid.org/0000-0002-4372-2105"
+license: Apache-2.0
+keywords:
+  - Lean 4
+  - formal verification
+  - evolutionary algorithms
+  - runtime analysis
+  - drift analysis

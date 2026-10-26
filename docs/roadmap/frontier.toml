@@ -1,0 +1,357 @@
+# ECRuntime formalization queue -- machine-readable single source of truth.
+#
+# "What to do next" previously lived as prose in six documents at three time
+# horizons. This file holds the structured form; the prose keeps its own voice.
+# No automated cross-check exists: the script that claimed to do it never ran, and
+# `scripts/audit.lean` reads the compiled environment, not this file. Keeping the two
+# in sync is manual.
+#
+# Reconciled with the 547-module merge on 26 October 2026: each entry was checked
+# against the merged Lean statements and docs/current/papers/, which stay
+# authoritative for per-paper coverage. Each target's `paper_file` (relative to this
+# directory) holds its paper's references and frontier assessment.
+#
+# status values:
+#   promoted  -- compiler-promoted through a recorded stage, full gate green
+#   merged    -- certified by the 547-module merge (full gate green in
+#                `verify.ps1 -Stage merge-547`), not through a recorded stage
+#   active    -- the current stage target
+#   open      -- ready to attempt, dependencies met
+#   blocked   -- needs a semantic framework the repository lacks
+#
+# Ingredients are the near-term dependency ledger for the active paper (A1).
+# Targets are the literature frontier, tiered by how much new semantic machinery
+# each one forces. Tier M holds open headline results of papers that the merge
+# covered only in part; their `new_framework` has not been assessed yet.
+
+[meta]
+checkpoint = "merge-547"
+active_target = "A1"
+toolchain = "leanprover/lean4:v4.32.1"
+mathlib = "v4.32.1"
+
+# --- Near-term ingredient ledger (Doerr-Janett-Lengler 2024) -----------------
+
+[[ingredient]]
+id = 1
+text = "static unary-unbiased operator law, radius masses, p1, chi, singleton weights"
+status = "promoted"
+promoted_at = "stage-68-fix-1"
+
+[[ingredient]]
+id = 2
+text = "drift as mask sum, exact singleton contribution, multiplicative drift at p1/n"
+status = "promoted"
+promoted_at = "stage-69-fix-1"
+
+[[ingredient]]
+id = 3
+text = "coordinate-flip mass, swap invariance, Pr[i flips] = chi/n, radius moments"
+status = "promoted"
+promoted_at = "stage-70-fix-1"
+
+[[ingredient]]
+id = 4
+text = "pair-event symmetry and the first two-coordinate bounds"
+status = "promoted"
+promoted_at = "stage-71"
+
+[[ingredient]]
+id = 5
+text = "exact ordered-pair double count and n(n-1) normalization"
+status = "promoted"
+promoted_at = "stage-72"
+
+[[ingredient]]
+id = 6
+text = "accepted-event mass bridge, conditional coefficient E[K(K-1)]/(p1(n-1))"
+status = "promoted"
+promoted_at = "stage-73"
+
+[[ingredient]]
+id = 7
+text = "concrete positive-linear accepted pivot events, pivot-event mass bound chi/n"
+status = "promoted"
+promoted_at = "stage-74"
+
+[[ingredient]]
+id = 8
+text = "accepted-event left/right split, exact Delta_L + Delta_R, right-loss proxy"
+status = "promoted"
+promoted_at = "stage-75"
+
+[[ingredient]]
+id = 9
+text = "corrected potential rho calibration, anchor envelope, gamma-tail identity, right-loss envelope"
+status = "promoted"
+promoted_at = "stage-78-fix-2"
+
+[[ingredient]]
+id = 10
+text = "event-weighted right-loss unconditioning and per-pivot drift assembly, then a global multiplicative-drift lower bound and runtime/tail/asymptotic corollaries"
+status = "merged"
+depends_on = ["stage-74", "stage-75", "stage-79-fix-1"]
+note = """plan steps 1-3 are certified by the merge, under NonincreasingLinearWeights: \
+StaticUnaryUnbiasedEventWeightedRightLoss (step 1), StaticUnaryUnbiasedPivotDrift (step 2), \
+StaticUnaryUnbiasedGlobalDrift, StaticUnaryUnbiasedCorrectedRuntime and \
+StaticUnaryUnbiasedSharpMomentUpper (step 3; the sharp 1/p1 envelope needs a uniform \
+bound on chi*E[K(K-1)]/p1^2). Step 4, a mean-only estimate, is not attempted. A1 has no \
+next ingredient defined yet."""
+plan = [
+  "relate event mass times the promoted conditional right-loss proxy to the actual event-weighted right loss, using the pivot-event upper mass chi/n",
+  "combine that with the promoted Stage-79 singleton left contribution to obtain the corrected per-pivot drift inequality",
+  "determine the strongest valid global multiplicative-drift theorem under the resulting factorial-moment condition",
+  "only if an additional argument recovers a mean-only estimate should the original chi-only statement be reinstated",
+]
+
+# --- Tier A: immediate continuations of the current proof chain --------------
+
+[[target]]
+id = "A1"
+paper_file = "papers/doerr-janett-lengler-2024.md"
+paper = "Doerr, Janett & Lengler (2024), Algorithmica 86(10) 3115-3152"
+doi = "10.1007/s00453-024-01258-9"
+goal = "finish the static unary-unbiased linear theorem (upper bound)"
+new_framework = "none"
+status = "active"
+note = "the published Lemma 9 conditional step does not survive formalization; see section 3.9 of docs/history/archive/FORMALIZED_RESULTS_AND_LITERATURE_FRONTIER.md. After the merge: an upper bound with leading coefficient 1/p1 holds under a uniform factorial-moment ratio bound; the unrestricted upper and lower headline bounds remain open (docs/current/papers/doerr-janett-lengler-2024.md)"
+
+[[target]]
+id = "A2"
+paper_file = "papers/witt-2013.md"
+paper = "Witt (2013), Combinatorics Probability and Computing 22(2)"
+doi = "10.1017/S0963548312000600"
+goal = "extend p = c/n from c <= log 3 to all fixed c > 0, sharp factor e^c/c"
+new_framework = "none"
+status = "open"
+note = "obstacle is the finite drift certificate outside C3, not the semantics"
+
+[[target]]
+id = "A3"
+paper_file = "papers/witt-2013.md"
+paper = "Witt (2013), second target"
+doi = "10.1017/S0963548312000600"
+goal = "matching lower bound and optimality of c = 1"
+new_framework = "process-level lower-bound theorem"
+status = "open"
+
+[[target]]
+id = "A4"
+paper_file = "papers/doerr-goldberg-2013.md"
+paper = "Doerr & Goldberg (2013), Algorithmica 65(1) 224-250"
+doi = "10.1007/s00453-011-9585-3"
+goal = "Theta(n log n) for every linear objective at every constant c/n"
+new_framework = "objective-dependent drift functions"
+status = "open"
+
+[[target]]
+id = "A5"
+paper_file = "papers/doerr-johannsen-winzen-2010.md"
+paper = "Doerr, Johannsen & Winzen, Non-Existence of Linear Universal Drift Functions"
+arxiv = "1011.3466"
+goal = "structural impossibility theorem complementing the positive Witt results"
+new_framework = "none"
+status = "open"
+
+[[target]]
+id = "A6"
+paper_file = "papers/jaegerskuepper-2008.md"
+paper = "Jaegerskuepper (2008), PPSN X, LNCS 5199 41-51"
+doi = "10.1007/978-3-540-87700-4_5"
+goal = "Markov-chain/drift blend; may expose reusable monotonicity lemmas"
+new_framework = "none"
+status = "open"
+
+[[target]]
+id = "A7"
+paper_file = "papers/lengler-spooner-2015.md"
+paper = "Lengler & Spooner (2015), FOGA XIII 52-61"
+doi = "10.1145/2725494.2725506"
+goal = "fixed-budget performance on linear functions"
+new_framework = "expected potential after a fixed step count"
+status = "open"
+
+[[target]]
+id = "A8"
+paper_file = "papers/einarsson-et-al-2019.md"
+paper = "Einarsson, Gauy, Lengler, Meier, Mujika, Steger & Weissenberger (2019), TCS 785 150-170"
+doi = "10.1016/j.tcs.2019.05.021"
+goal = "Linear Hidden Subset; scheduled constant beta ~ 3.552"
+new_framework = "time-dependent mutation schedule"
+status = "open"
+
+# --- Tier B: close extensions of existing LeadingOnes / drift machinery ------
+
+[[target]]
+id = "B1"
+paper_file = "papers/boettcher-doerr-neumann-2010.md"
+paper = "Boettcher, Doerr & Neumann (2010)"
+goal = "optimal static LeadingOnes rate p ~ 1.59/n, runtime ~ 0.77 n^2"
+new_framework = "none (real asymptotic optimization)"
+status = "merged"
+note = "LeadingOnesOptimalRate: E[T]/n^2 -> (e^c-1)/(2c^2) for p = c/n, and a unique optimal c in (1,2) with (2-c)e^c = 2, minimal over all c > 0. The decimals 1.59 and 0.77 are not certified as numerical enclosures"
+
+[[target]]
+id = "B2"
+paper_file = "papers/boettcher-doerr-neumann-2010.md"
+paper = "Boettcher, Doerr & Neumann (2010), second target"
+goal = "fitness-dependent adaptive rate, ~ 0.68 n^2"
+new_framework = "state-dependent mutation kernel"
+status = "open"
+note = "partly merged: exact adaptive runtime and the optimal schedule p_i = 1/(i+1) (docs/current/papers/boettcher-doerr-neumann-2010.md). Remaining: the asymptotic E[T_opt]/n^2 -> ~0.68 and its comparison with B1"
+
+[[target]]
+id = "B4"
+paper_file = "papers/doerr-2019.md"
+paper = "Doerr (2019), TCS 773 115-137"
+goal = "fastest unary-unbiased LeadingOnes algorithms"
+new_framework = "none"
+status = "open"
+note = "one of the strongest intersections of two already-developed branches"
+
+[[target]]
+id = "B6"
+paper_file = "papers/lehre-witt-2014.md"
+paper = "Lehre & Witt, General Drift Analysis with Tail Bounds"
+arxiv = "1307.2559"
+goal = "general variable-drift with upper and lower tails"
+new_framework = "variable drift"
+status = "open"
+note = "would unify several existing modules and unlock later papers"
+
+[[target]]
+id = "B9"
+paper_file = "papers/doerr-koetzing-2024.md"
+paper = "Doerr & Koetzing (2024), Algorithmica 86 367-395"
+doi = "10.1007/s00453-022-00952-w"
+goal = "lower bounds from fitness levels via visitation probabilities"
+new_framework = "lower-bound fitness-level interface"
+status = "open"
+note = "recommended as the preferred lower-bound interface; formalization order item 2"
+
+# --- Tier C / D: require substantial new semantic frameworks -----------------
+
+[[target]]
+id = "C11"
+paper_file = "papers/lengler-2020.md"
+paper = "Lengler (2020), IEEE TEC 24(6) 995-1009"
+doi = "10.1109/TEVC.2019.2917014"
+goal = "monotone-function dichotomy, key parameter m2/m1"
+new_framework = "monotone function family"
+status = "open"
+note = "exceptionally close to the current interface: meanRadius is m1, secondFactorialRadiusMoment is exactly m2"
+
+[[target]]
+id = "C9"
+paper_file = "papers/buzdalov-doerr-2021.md"
+paper = "Buzdalov & Doerr (2021), GECCO 660-668"
+doi = "10.1145/3449639.3459389"
+goal = "optimal static distributions over mutation strengths"
+new_framework = "none"
+status = "open"
+note = "unusually natural: the repository already represents an arbitrary static radius distribution. The merged UnaryOneMax* modules compare singleton-supported static laws on OneMax; that is not the optimal-distribution theorem"
+
+[[target]]
+id = "D1"
+paper_file = "papers/antipov-doerr-2021.md"
+paper = "Antipov & Doerr (2021), ACM TELO 1(4) Art. 13"
+doi = "10.1145/3469800"
+goal = "precise plateau runtimes for arbitrary unbiased operators"
+new_framework = "plateau semantics"
+status = "open"
+note = "most direct non-linear application of the Stage-68 operator abstraction. The merged JumpPlateauEscape covers only standard bit mutation on the Jump plateau"
+
+[[target]]
+id = "C1"
+paper_file = "papers/lehre-witt-2012.md"
+paper = "Lehre & Witt (2012), Algorithmica 64(4) 623-642"
+doi = "10.1007/s00453-012-9616-8"
+goal = "unbiased black-box model and Omega(n log n) lower bounds"
+new_framework = "algorithm/query-history black-box model"
+status = "blocked"
+
+[[target]]
+id = "E1"
+paper_file = "papers/population-and-crossover.md"
+paper = "population and crossover results, e.g. the (1+(lambda,lambda)) GA"
+goal = "population-based runtime analysis"
+new_framework = "population states, multi-stage iterations, crossover kernels"
+status = "blocked"
+
+# --- Tier M: open headline results of papers the merge covered in part ---------
+# Goals restate the "Not yet verified" sections of docs/current/papers/. Papers
+# already represented above (P01 -> B1/B2, P05 -> B6, P06 -> B4, P10 -> A2/A3,
+# P11 -> A1) are not repeated.
+
+[[target]]
+id = "M1"
+paper_file = "papers/doerr-doerr-2016.md"
+paper = "Doerr & Doerr (2016), Algorithmica -- random initialization (P02b)"
+doi = "10.1007/s00453-015-0019-5"
+goal = "uniform versus average-fitness initialization for the (1+1) EA on OneMax and for RLS and the (1+1) EA on LeadingOnes"
+new_framework = "unassessed"
+status = "open"
+note = "only the RLS/OneMax combination is merged"
+
+[[target]]
+id = "M2"
+paper_file = "papers/he-yao-2001.md"
+paper = "He & Yao (2001), Artificial Intelligence -- drift and average time complexity (P03)"
+doi = "10.1016/S0004-3702(01)00058-3"
+goal = "exponential lower-time drift conditions and the polynomial-versus-exponential classifications"
+new_framework = "unassessed"
+status = "open"
+note = "the population/crossover parts of the paper fall under E1"
+
+[[target]]
+id = "M3"
+paper_file = "papers/doerr-johannsen-winzen-2012.md"
+paper = "Doerr, Johannsen & Winzen (2012), multiplicative drift (P04)"
+arxiv = "1101.0776"
+goal = "the (1.39+o(1)) e n ln n bound in the paper's own parameterization and the matching e n ln n lower bound"
+new_framework = "unassessed"
+status = "open"
+note = "the lower bound overlaps A3; the MST, shortest-path and Euler-tour applications need graph semantics"
+
+[[target]]
+id = "M4"
+paper_file = "papers/buzdalov-et-al-2020.md"
+paper = "Buzdalov, Doerr, Doerr & Vinokurov, fixed-target runtime analysis (P07)"
+arxiv = "2004.09613"
+goal = "Theorems 4 and 5 across all operators, initializations, mutation rates and parameter ranges"
+new_framework = "unassessed"
+status = "open"
+note = "the RLS/OneMax and fixed-rate uniform-start LeadingOnes subcases are merged"
+
+[[target]]
+id = "M5"
+paper_file = "papers/jansen-zarges-2014.md"
+paper = "Jansen & Zarges (2014), TCS -- fixed-budget performance (P08)"
+doi = "10.1016/j.tcs.2013.06.007"
+goal = "(1+1) EA fixed-budget bounds, and the LeadingOnes, Jump and Ridge regimes"
+new_framework = "unassessed"
+status = "open"
+note = "only the one-bit RLS expected-zero-count slice is merged; A7 is the linear-function analogue"
+
+[[target]]
+id = "M6"
+paper_file = "papers/doerr-et-al-2017.md"
+paper = "Doerr, Le, Makhmara & Nguyen (2017), fast genetic algorithms (P09)"
+arxiv = "1703.03334"
+goal = "complete Jump runtime with two-sided bounds, and heavy-tailed mutation"
+new_framework = "unassessed"
+status = "open"
+note = "plateau escape and the optimal fixed escape rate are merged"
+
+[[target]]
+id = "M7"
+paper_file = "papers/droste-jansen-wegener-2002.md"
+paper = "Droste, Jansen & Wegener (2002), TCS -- the (1+1) EA (P12)"
+doi = "10.1016/S0304-3975(01)00182-7"
+goal = "mutation-rate regime claims, exponential-time examples, and the hierarchy theorem"
+new_framework = "unassessed"
+status = "open"
+
+# Recommended order (section 7 of the archived FORMALIZED_RESULTS document): A1, B9, B1/B2, A2/A4, C1, C11, D1.
+# Not a ranking supplied by the cited literature -- a repository-engineering judgement.
+# It predates the merge: B1 is now merged, and Tier M is not yet ranked.
