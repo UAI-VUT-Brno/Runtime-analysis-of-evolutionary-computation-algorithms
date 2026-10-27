@@ -23,16 +23,6 @@ principles and has a proof assistant check every step.
   with exact fixed-rate and adaptive LeadingOnes runtimes and the optimal rates. Each paper
   has its own file in [`docs/current/papers/`](docs/current/papers/) listing what is
   certified and what is missing.
-- **A gap found in a 2024 paper.** While formalizing
-  [Doerr, Janett and Lengler (2024)](docs/current/papers/doerr-janett-lengler-2024.md), the
-  project found
-  [a conditioning issue](docs/history/doerr-janett-lengler-2024.md#roadmap-notes--stage-70-fix-1-promoted-exact-coordinate-marginal-and-claim-9-audit)
-  in an intermediate displayed step (the original audit is section 3.9 of the
-  [archived frontier document](docs/history/archive/FORMALIZED_RESULTS_AND_LITERATURE_FRONTIER.md#39-audit-of-the-2024-papers-conditional-pair-step)).
-  Rather than certify the published proof verbatim, the repository builds a
-  [corrected factorial-moment route](docs/history/doerr-janett-lengler-2024.md), stages
-  70–79; the paper's unrestricted headline bounds are **not** proved, and
-  [what remains](docs/roadmap/papers/doerr-janett-lengler-2024.md) is on the roadmap.
 - **Open.** Not every merged statement has been reviewed against its paper, and the
   merged theorems lack non-vacuity witnesses (see
   [below](#how-the-claims-are-kept-honest)). What comes next is in
